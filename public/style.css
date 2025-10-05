@@ -1,0 +1,169 @@
+body {
+  background-color: #f5f7fa;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.navbar {
+  background: white !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.gradient-text {
+  font-size: 3rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1E88E5, #43A047);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sqaure-button {
+  width: 150px; /* Set desired width */
+  height: 150px; /* Set height equal to width */
+  /* Optional: Add other styling for appearance */
+  background: linear-gradient(135deg, #43A047, #1E88E5);
+  color: white;
+  border: white;
+  font-size: 16px;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 35px;
+  transform: translateY(-3px);
+}
+
+.feature-card {
+  min-height: 180px;       /* sab cards ki height fix */
+  display: flex; 
+  flex-direction: column;
+  justify-content: center; /* text center me */
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  transition: all 0.3s ease-in-out;
+}
+
+.feature-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+}
+
+.feature-card i, .feature-card img {
+  font-size: 32px; /* icon size same */
+  margin-bottom: 10px;
+}
+
+.gradient {
+   font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #1E88E5, #43A047);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.nav-link {
+  font-size: 1.2rem;
+  color: #1E88E5 !important;
+  margin-left: 20px;
+  font-weight: 500;
+}
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+.hero {
+  background: linear-gradient(135deg, #1E88E5, #43A047);
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.hero h1 { font-size: 2.4rem; font-weight: bold; }
+.hero h2 { font-size: 2rem; margin-top: 10px; }
+.hero p { font-size: 1.2rem; margin-top: 15px; }
+
+
+.connect {
+  background: linear-gradient(135deg, #1E88E5, #43A047);
+  color: white;
+  padding: 20px 20px;
+  text-align: center;
+}
+
+.btn-main {
+  background: #FB8C00;
+  color: white;
+  font-weight: bold;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  margin-top: 20px;
+}
+.btn-main:hover { background: #E65100; }
+
+
+.brand-footer {
+  background: #212121;
+  color: #f5f5f5;
+  padding: 25px;
+  text-align: center;
+  font-size: 0.9rem;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+.brand-footer span { color: #FFB300; font-weight: bold; }
+
+/* Loader CSS */
+#loader {
+  display: none;
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.avatar-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+}
+
+/* Make body take full height */
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Content grows and pushes footer down */
+.container, .content {
+  flex: 1;
+}
+
+/* Footer stays at bottom */
+footer {
+  background: #212121;
+  color: #f5f5f5;
+  padding: 15px;
+  text-align: center;
+  margin-top: auto;  /* pushes footer to bottom */
+}
+footer span {
+  color: #FFB300;
+  font-weight: bold;
+}

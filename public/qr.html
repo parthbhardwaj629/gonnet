@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gonnet - QR Code</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="/style.css" rel="stylesheet"> <!-- common branding + gradient -->
+  <style>
+    body { background-color: #f5f7fa; }
+    .qr-container { text-align: center; margin-top: 50px; }
+    .qr-container img { width: 280px; height: 280px; border: 6px solid #1E88E5; border-radius: 12px; background: white; }
+    .qr-container h2 { margin-bottom: 20px; }
+    .footer {
+      background: #212121;
+      color: #f5f5f5;
+      padding: 15px;
+      text-align: center;
+      margin-top: 40px;
+    }
+    .footer span { color: #FFB300; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Branding -->
+    <div class="text-center mt-3">
+      <h2 class="gradient-text">Gonnet</h2>
+    </div>
+
+    <div class="qr-container">
+      <h2>Your QR Code</h2>
+      <div class="text-center mt-3" id="qrBox">
+        <p>Loading QR...</p>
+      </div>
+      <p class="mt-3">
+        <a id="profileLink" href="#" target="_blank" class="btn btn-dark">
+          <i class="fas fa-user"></i> Go to Profile
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2025 Gonnet. All Rights Reserved.</p>
+    <p><span>Powered by Ganga Motors</span> – Gurgaon's 1st Maruti Authorized Workshop</p>
+  </div>
+
+  <script>
+    async function loadQR() {
+      let uniqueId = window.location.pathname.split("/")[2];
+      const res = await fetch(`/api/profile/${uniqueId}`);
+      const data = await res.json();
+
+      if (data.error) {
+        document.getElementById("qrBox").innerHTML =
+          `<div class="alert alert-danger">${data.error}</div>`;
+        return;
+      }
+
+      const profileUrl = `${window.location.origin}/profile/${uniqueId}/view`;
+      document.getElementById("profileLink").href = profileUrl;
+
+      // Generate QR dynamically via backend
+      const qrRes = await fetch(`/api/qr/${uniqueId}`);
+      const qrData = await qrRes.json();
+
+      if (qrData.qrImage) {
+        document.getElementById("qrBox").innerHTML = `
+          <img src="${qrData.qrImage}" alt="QR Code"/>
+        `;
+      } else {
+        document.getElementById("qrBox").innerHTML =
+          `<div class="alert alert-danger">Failed to load QR</div>`;
+      }
+    }
+
+    loadQR();
+  </script>
+</body>
+</html>

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gonnet - Register / Update Profile</title>
+ <link rel="stylesheet" href="/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!--<style>
+    .avatar-preview { display:none; width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #ccc; }
+    .form-check { margin-top:6px; }
+    .brand-footer { background:#212121; color:#f5f5f5; padding:20px; text-align:center; margin-top:30px; }
+  </style>-->
+</head>
+<body>
+  <div id="loader"></div>
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <div class="gonnet-top">
+  <a class="gradient-text" href="/">Gonnet</a>
+</div>
+<div class="text-muted">
+  Scan to Know More. 
+  <br>Connect Instantly. 
+  <br>With Privacy.
+</div>
+      </div>
+      <!-- Right: upload + preview -->
+<div class="card shadow">
+ <!-- <div class="card-header hero text-white">Profile Photo</div>-->
+ <!-- <div class="card-body text-center">
+    <img 
+  id="avatarPreview" 
+  src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAL34HQAAAAclBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/Sp0lAAAALHRSTlMAAwgQFBgcICQoLzI3PD9BQ0ZKTU5RUlVYXV5hbm9ydHt+goiMjpCTl5iZmp2ho6Wrrb+ANxHvAAACbElEQVR4Ae3b63KDMBQFUF2i0oRWVbb/f+Sg5g7vyiGL0zLkSzH5nYAwfC0+ldaa9EJEXVbff1dcJ0eUO0I4Zl1HXuVGe51X3us0bGZSnrny7bCUW+SPeYriR4ehw8ePHjz9fwiY+nI6eWQ8Uz89BBUM3WJ4I7HbQ9c+3YcTeG9Grd6BdO43NV7iM2Snb9xVPblYf5Otpt+WHF2IvJcTxguZbiV1AZRwTW+TwU1d4mdRcmC2fZiHaePzHzP9xlS+Y3LGL1HD3zZlVysktFzJ8z+wXGHnnPmZw3xnUeufh1L5fsFpdHzvkeQzZvVyoQL6j2q9QbRdQHLZzcdx85rnVWtLDZzrZrbDBbRbA5WsoNeuj1g3VeTRIM82QfRdQDLs6yZ58yxWe+awreRfxy3x8aPMmf2Y8+6bp/bLD0RdQvMtZVuRe9TzL0h2+X/dof7/RZ3+ebTfptC2yuGmX5gD5vl7wN5Ku9DL/+eGgDFKOTRq9iJwAAAABJRU5ErkJggg==" 
+  alt="Default Avatar" 
+  style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #ccc;">
+    <div class="mt-2">
+      <input type="file" id="profileImage" name="photo" accept="image/*" class="form-control mb-2">
+      <button type="button" id="removePhotoBtn" class="btn btn-sm btn-outline-danger">
+        <i class="fas fa-trash"></i> Remove Photo
+      </button>
+    </div>
+  </div>-->
+</div>
+
+    </div>
+
+   <!-- <div class="text-center mb-3">
+      <h4 class="fw-bold text-danger"> Register Yourself</h4>
+    </div>-->
+
+      <div class="text-center mt-3">
+        <button  class="btn hero text-white">
+         Register Yourself 
+        </button>
+        <br>
+      </br>
+      </div>
+
+
+    <form id="registerForm" enctype="multipart/form-data">
+      <!-- Basic Info -->
+      <div class="card shadow">
+        <div class="card-header hero text-white"> Basic Information</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Name</label>
+              <input name="name" class="form-control" required>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="visible_name" checked>
+                <label class="form-check-label">Visible to others</label>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Mobile Number</label>
+              <input name="mobile" class="form-control" required>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="visible_mobile" checked>
+                <label class="form-check-label">Visible to others</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Car Number</label>
+              <input name="carNumber" class="form-control" required>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="visible_carNumber" checked>
+                <label class="form-check-label">Visible to others</label>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Email</label>
+              <input name="email" type="email" class="form-control" required>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="visible_email" checked>
+                <label class="form-check-label">Visible to others</label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bio -->
+      <div class="card shadow mt-3">
+        <div class="card-header hero text-white"> About You</div>
+        <div class="card-body">
+          <textarea name="bio" class="form-control" rows="3" placeholder="A short intro, profession, experience..."></textarea>
+        </div>
+      </div>
+
+      <!-- Emergency -->
+      <div class="card shadow mt-3">
+        <div class="card-header hero text-white"> Emergency Contact</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4 mb-3"><label class="form-label">Contact Name</label><input name="emergencyName" class="form-control" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Relation</label><input name="emergencyRelation" class="form-control" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Contact Number</label><input name="emergencyNumber" class="form-control" required>
+              <div class="form-check"><input class="form-check-input" type="checkbox" name="visible_emergencyNumber" checked><label class="form-check-label">Visible to others</label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Social -->
+      <div class="card shadow mt-3">
+        <div class="card-header hero text-white"> Social Profiles (Optional)</div>
+        <div class="card-body">
+          <div class="mb-2"><input name="instagram" class="form-control" placeholder="Instagram URL"></div>
+          <div class="mb-2"><input name="linkedin" class="form-control" placeholder="LinkedIn URL"></div>
+          <div class="mb-2"><input name="github" class="form-control" placeholder="GitHub URL"></div>
+          <div class="mb-2"><input name="twitter" class="form-control" placeholder="Twitter URL"></div>
+          <div class="mb-2"><input name="facebook" class="form-control" placeholder="Facebook URL"></div>
+          <div class="mb-2"><input name="website" class="form-control" placeholder="Website URL"></div>
+        </div>
+      </div>
+
+      <div class="text-center mt-3">
+  <button id="submitBtn" type="submit" class="btn hero px-4 text-white">
+     Submit
+  </button>
+</div>
+    </form>
+
+       <footer class="text-center brand-footer">
+        
+      <p>© 2025 Gonnet. All Rights Reserved. <span style="color:#FFB300;font-weight:700;">Powered by Ganga Motors</span></p>
+    </footer>
+  </div>
+
+
+
+<script>
+(async function () {
+  function getUniqueId() {
+    const parts = window.location.pathname.split('/');
+    return parts.length >= 3 ? parts[2] : null;
+  }
+
+  const uniqueId = getUniqueId();
+//  const avatarPreview = document.getElementById('avatarPreview');
+//  const profileImageInput = document.getElementById('profileImage');
+  const form = document.getElementById('registerForm');
+  const loader = document.getElementById('loader');
+  const btn = document.getElementById('submitBtn');
+  // Remove Photo Button
+const removePhotoBtn = document.getElementById("removePhotoBtn");
+
+//removePhotoBtn.addEventListener("click", () => {
+//  avatarPreview.src = "/assets/johndoe.png";  // reset preview
+//  profileImageInput.value = "";               // clear file input
+//});
+
+// Photo Preview
+//  profileImageInput.addEventListener('change', function (e) {
+//    const f = e.target.files[0];
+//    if (!f) return;
+//    const reader = new FileReader();
+//    reader.onload = function (ev) {
+//      avatarPreview.src = ev.target.result;
+//      avatarPreview.style.display = 'inline-block';
+//    };
+//    reader.readAsDataURL(f);
+//  });
+
+  // Load existing data
+  async function loadCustomer() {
+    if (!uniqueId) return;
+    try {
+      const res = await fetch(`/api/profile/${uniqueId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      // Agar registered hai
+if (data.isRegistered) {
+  // OTP ke bina aya hai → view page bhej do
+  if (!location.search.includes('fromOtp=true')) {
+    window.location.href = `/profile/${uniqueId}/view`;
+    return;
+  }
+  // OTP ke saath aya hai → prefilled form khula rahega (update mode)
+}
+
+      const fields = [
+        'name','mobile','carNumber','email','bio',
+        'emergencyName','emergencyRelation','emergencyNumber',
+        'instagram','linkedin','github','twitter','facebook','website'
+      ];
+
+      fields.forEach(f => {
+        const el = document.querySelector(`[name="${f}"]`);
+        if (!el) return;
+        if (data[f]) el.value = data[f];
+        if (data.socialLinks && data.socialLinks[f]) el.value = data.socialLinks[f];
+      });
+
+//      if (data.photo) {
+//        avatarPreview.src = data.photo;
+//        avatarPreview.style.display = 'inline-block';
+//      } else {
+//        avatarPreview.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACWCAMAAAAL34HQAAAAclBMVEUAAAD///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////9/Sp0lAAAALHRSTlMAAwgQFBgcICQoLzI3PD9BQ0ZKTU5RUlVYXV5hbm9ydHt+goiMjpCTl5iZmp2ho6Wrrb+ANxHvAAACbElEQVR4Ae3b63KDMBQFUF2i0oRWVbb/f+Sg5g7vyiGL0zLkSzH5nYAwfC0+ldaa9EJEXVbff1dcJ0eUO0I4Zl1HXuVGe51X3us0bGZSnrny7bCUW+SPeYriR4ehw8ePHjz9fwiY+nI6eWQ8Uz89BBUM3WJ4I7HbQ9c+3YcTeG9Grd6BdO43NV7iM2Snb9xVPblYf5Otpt+WHF2IvJcTxguZbiV1AZRwTW+TwU1d4mdRcmC2fZiHaePzHzP9xlS+Y3LGL1HD3zZlVysktFzJ8z+wXGHnnPmZw3xnUeufh1L5fsFpdHzvkeQzZvVyoQL6j2q9QbRdQHLZzcdx85rnVWtLDZzrZrbDBbRbA5WsoNeuj1g3VeTRIM82QfRdQDLs6yZ58yxWe+awreRfxy3x8aPMmf2Y8+6bp/bLD0RdQvMtZVuRe9TzL0h2+X/dof7/RZ3+ebTfptC2yuGmX5gD5vl7wN5Ku9DL/+eGgDFKOTRq9iJwAAAABJRU5ErkJggg==';
+//        avatarPreview.style.display = 'inline-block';
+//      }
+
+    } catch (err) {
+      console.error("❌ Load customer error:", err);
+    }
+  }
+  await loadCustomer();
+
+  // Submit handler
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    loader.style.display = "block";
+    btn.disabled = true;
+    btn.innerText = 'Saving...';
+
+    try {
+      const formData = new FormData(form);
+
+    //  if (profileImageInput.files[0]) {
+    //    formData.set('photo', profileImageInput.files[0]);
+    //  }
+
+      const res = await fetch(`/api/register/${uniqueId}`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const body = await res.json();
+      if (!res.ok) {
+        alert(body.error || 'Submit failed');
+      } else {
+        alert(body.message || 'Saved');
+        window.location.href = body.redirect || `/profile/${uniqueId}/view`;
+      }
+    } catch (err) {
+      console.error("❌ Submit error:", err);
+      alert("Something went wrong while submitting");
+    } finally {
+      loader.style.display = "none";
+      btn.disabled = false;
+      btn.innerText = 'Submit';
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

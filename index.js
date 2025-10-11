@@ -80,17 +80,17 @@ app.get("/generate", async (req, res) => {
     const newCustomer = new Customer({ uniqueId });
     await newCustomer.save();
 
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
-const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
-const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;``
+    const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+    const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
+    const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+    const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
     const qrImage = await QRCode.toDataURL(profileUrl);
 
     // ---- Background Email to Admin ----
     (async () => {
       try {
         await transporter.sendMail({
-          from: `Gonnet <no-reply@gonnet.in>`,
+          from: `Gonnet <${GMAIL_USER}>`,
           to: GMAIL_USER,
           subject: `New QR Created - ${uniqueId}`,
           html: `
@@ -141,7 +141,7 @@ app.get("/profile/:uniqueId/view", (req, res) => {
 app.get("/profile/:uniqueId/qr", async (req, res) => {
   try {
     const { uniqueId } = req.params;
-    const profileUrl = `http://localhost:${PORT}/profile/${uniqueId}/view`;
+    const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
     const qrImage = await QRCode.toDataURL(profileUrl);
 
     res.send(`
@@ -203,9 +203,10 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
     res.json({ message: "✅ Saved successfully", redirect: `/profile/${uniqueId}/view` });
 
     // build URLs & QR
-    const profileUrl = `http://localhost:${PORT}/profile/${uniqueId}/view`;
-    const inputUrl = `http://localhost:${PORT}/profile/${uniqueId}/input`;
-    const qrUrl = `http://localhost:${PORT}/profile/${uniqueId}/qr`;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
+const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
     const qrImage = await QRCode.toDataURL(profileUrl);
 
     // ---- MAILS ----
@@ -238,7 +239,7 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
 
         // Admin Mail (one mail with raw + user data)
         await transporter.sendMail({
-          from: `Gonnet <no-reply@gonnet.in>`,
+          from: `Gonnet <${GMAIL_USER}>`,
           to: GMAIL_USER,
           subject: `New Registration - ${body.name || "Unknown"}`,
           html: `

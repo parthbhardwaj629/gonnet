@@ -80,9 +80,10 @@ app.get("/generate", async (req, res) => {
     const newCustomer = new Customer({ uniqueId });
     await newCustomer.save();
 
-    const profileUrl = `http://localhost:${PORT}/profile/${uniqueId}/view`;
-    const inputUrl = `http://localhost:${PORT}/profile/${uniqueId}/input`;
-    const qrUrl = `http://localhost:${PORT}/profile/${uniqueId}/qr`;
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
+const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
     const qrImage = await QRCode.toDataURL(profileUrl);
 
     // ---- Background Email to Admin ----

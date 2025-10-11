@@ -9,11 +9,12 @@ const multer = require("multer");
 const QRCode = require("qrcode");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // ----- CONFIG -----
-const GMAIL_USER = "hello.gonnet@gmail.com";
-const GMAIL_PASS = "skbr momu eagm lmfh"; // Gmail App Password
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_PASS = process.env.GMAIL_PASS; // Gmail App Password
+const MONGO_URL = process.env.MONGO_URL;
 // -------------------------------------------------------
 
 app.use(bodyParser.json());
@@ -29,11 +30,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // MongoDB
-mongoose.connect(
-  "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB",
-  { useNewUrlParser: true, useUnifiedTopology: true }
-).then(() => console.log("✅ MongoDB Connected"))
+mongoose.connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
+
 
 // Schema
 const customerSchema = new mongoose.Schema({

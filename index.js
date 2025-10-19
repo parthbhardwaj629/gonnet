@@ -10,6 +10,7 @@ const QRCode = require("qrcode");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const BASE_URL = process.env.BASE_URL || 'https://gonnet.in';
 
 // ----- CONFIG -----
 const GMAIL_USER = process.env.GMAIL_USER;
@@ -64,7 +65,9 @@ const Customer = mongoose.model("Customer", customerSchema);
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: { user: GMAIL_USER, pass: GMAIL_PASS }
 });
 
@@ -80,7 +83,7 @@ app.get("/generate", async (req, res) => {
     const newCustomer = new Customer({ uniqueId });
     await newCustomer.save();
 
-    const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+    
     const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
     const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
     const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
@@ -203,7 +206,7 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
     res.json({ message: "✅ Saved successfully", redirect: `/profile/${uniqueId}/view` });
 
     // build URLs & QR
-const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+
 const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
 const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
 const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
@@ -241,7 +244,7 @@ const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
         await transporter.sendMail({
           from: `Gonnet <${GMAIL_USER}>`,
           to: GMAIL_USER,
-          subject: `New Registration - ${body.name || "Unknown"}`,
+          subject: `Registration - ${body.name || "Unknown"}`,
           html: `
             <h3>New Registration</h3>
             <p><b>Profile ID:</b> ${uniqueId}</p>
@@ -316,4 +319,4 @@ app.post("/api/verify-otp/:uniqueId", async (req, res) => {
 ["car-bike","pets","products","emergency","identity","custom-qr"]
   .forEach(p => app.get("/"+p, (req,res)=>res.sendFile(path.join(__dirname,"public",`${p}.html`))));
 
-app.listen(PORT, () => console.log(`🚀 Running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

@@ -10,12 +10,13 @@ const QRCode = require("qrcode");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const BASE_URL = process.env.BASE_URL || 'https://gonnet.in';
+//const BASE_URL = process.env.BASE_URL || 'https://gonnet.in';
 
 // ----- CONFIG -----
-const GMAIL_USER = process.env.GMAIL_USER;
-const GMAIL_PASS = process.env.GMAIL_PASS; // Gmail App Password
-const MONGO_URL = process.env.MONGO_URL;
+const GMAIL_USER = "hello.gonnet@gmail.com";
+const GMAIL_PASS = "skbr momu eagm lmfh";
+const MONGO_URL = "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
+const BASE_URL = `http://localhost:3000`;
 // -------------------------------------------------------
 
 app.use(bodyParser.json());
@@ -65,9 +66,7 @@ const Customer = mongoose.model("Customer", customerSchema);
 
 // Nodemailer transporter
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
+  service: "gmail",
   auth: { user: GMAIL_USER, pass: GMAIL_PASS }
 });
 
@@ -85,9 +84,12 @@ app.get("/generate", async (req, res) => {
 
     
     const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
-    const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+ //   const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
     const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
-    const qrImage = await QRCode.toDataURL(profileUrl);
+   // const qrImage = await QRCode.toDataURL(profileUrl);
+const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+const qrImage = await QRCode.toDataURL(inputUrl);
+
 
     // ---- Background Email to Admin ----
     (async () => {

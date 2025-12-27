@@ -181,26 +181,14 @@ app.get("/profile/:uniqueId/view", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "display.html"));
 });
 
-// QR page
-app.get("/profile/:uniqueId/qr", async (req, res) => {
-  try {
-    const { uniqueId } = req.params;
-    const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
-    const qrImage = await QRCode.toDataURL(profileUrl);
+app.get("/profile/:uniqueId/qr", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "qr-card.html"));
+});
 
-    res.send(`
-      <html><head><title>Gonnet - QR</title><link href="/style.css" rel="stylesheet"></head>
-      <body style="text-align:center;padding:40px;font-family:Segoe UI,Arial;">
-        <h2 class="gradient-text">Gonnet</h2>
-        <h3>Your QR Code</h3>
-        <img src="${qrImage}" style="width:280px;height:280px;border:6px solid #1E88E5;border-radius:12px;display:block;margin:20px auto;" />
-        <p><a href="${profileUrl}" target="_blank">Go to profile</a></p>
-        <p style="color:#777;">Powered by Ganga Motors</p>
-      </body></html>
-    `);
-  } catch (err) {
-    res.status(500).send("Failed to generate QR");
-  }
+app.get("/api/qr/:uniqueId", async (req, res) => {
+  const profileUrl = `${BASE_URL}/profile/${req.params.uniqueId}/view`;
+  const qrImage = await QRCode.toDataURL(profileUrl);
+  res.json({ qrImage });
 });
 
 // Fetch profile

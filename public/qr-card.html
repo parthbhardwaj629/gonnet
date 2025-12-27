@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Gonnet QR Card</title>
+
+<link href="/style.css" rel="stylesheet">
+
+<style>
+/* ===== GLOBAL FIX (MOST IMPORTANT) ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: #f5f7fa;
+  margin: 0;
+  padding: 30px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ===== CARD ===== */
+.qr-card {
+  width: 92mm;
+  height: 45mm;
+  display: grid;
+  grid-template-columns: 64% 36%;
+  border: 1px solid #000;
+  background: #fff;
+  margin: auto;
+  overflow: hidden;
+}
+
+/* ===== LEFT TEXT ===== */
+.left {
+  padding: 6mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand {
+  font-size: 14pt;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.meta {
+  font-size: 7pt;
+  color: #444;
+  margin-top: 2mm;
+  line-height: 1.35;
+}
+
+.meta .powered {
+  color: #FFB300;
+  font-weight: 700;
+}
+
+.headline {
+  margin-top: 4mm;
+  font-size: 10pt;
+  font-weight: 700;
+  line-height: 1.3;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+.note {
+  margin-top: 2mm;
+  font-size: 6.5pt;
+  color: #666;
+}
+
+/* ===== RIGHT GRADIENT ===== */
+.right {
+  background: linear-gradient(135deg, #1E88E5, #43A047);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3mm;
+  overflow: hidden;
+}
+
+/* ===== WHITE QR BOX (TOP) ===== */
+.qr-white {
+  background: #fff;
+  border-radius: 4mm;
+  padding: 3mm;
+  width: calc(100% - 0.1mm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-white img {
+  width: 24mm;
+  height: 24mm;
+  display: block;
+}
+
+/* ===== TAGLINE (BOTTOM, OUTSIDE WHITE BOX) ===== */
+.qr-tagline {
+  margin-top: 2.5mm;
+  font-size: 6pt;
+  color: #fff;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  body {
+    background: white;
+    padding: 0;
+  }
+  .qr-card {
+    margin: 0;
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="qr-card">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="brand gradient-text">GONNET</div>
+
+    <div class="meta">
+      © 2025 Gonnet. All Rights Reserved.<br>
+      <span class="powered">Powered by Ganga Motors</span><br>
+      Gurgaon’s 1st Maruti Authorized Workshop
+    </div>
+
+    <div class="headline">
+      Scan to know more.<br>
+      Connect instantly
+    </div>
+
+    <div class="note">
+      Scan using phone camera or QR scanner
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <!-- TOP WHITE QR BOX -->
+    <div class="qr-white" id="qrBox">
+      Loading…
+    </div>
+
+    <!-- BOTTOM TAGLINE -->
+    <div class="qr-tagline">
+      <div class="font-size">  GONNET </div>
+      Scan to know more.<br>
+      Connect instantly
+    </div>
+  </div>
+
+</div>
+
+<script>
+async function loadQR() {
+  const uniqueId = window.location.pathname.split("/")[2];
+  const res = await fetch(`/api/qr/${uniqueId}`);
+  const data = await res.json();
+
+  if (data.qrImage) {
+    document.getElementById("qrBox").innerHTML =
+      `<img src="${data.qrImage}" alt="QR Code">`;
+  } else {
+    document.getElementById("qrBox").innerText = "QR Error";
+  }
+}
+loadQR();
+</script>
+
+</body>
+</html>

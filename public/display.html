@@ -85,19 +85,42 @@ async function loadProfile() {
     html += `<div class="card shadow mt-3"><div class="card-header hero text-white">About</div><div class="card-body"><p>${data.bio}</p></div></div>`;
   }
 
-  html += `<div class="card shadow mt-3"><div class="card-header hero text-white">Emergency Contact</div><div class="card-body">`;
-  html += `<p><b>Name:</b> ${isVisible('emergencyName') ? (data.emergencyName || '') : '<span class="text-muted">[Hidden]</span>'}</p>`;
-  html += `<p><b>Relation:</b> ${isVisible('emergencyRelation') ? (data.emergencyRelation || '') : '<span class="text-muted">[Hidden]</span>'}</p>`;
-  html += `<p><b>Number:</b> ${
-    data.emergencyNumber
-      ? `<a href="tel:${data.emergencyNumber}" class="btn btn-sm btn-outline-danger me-2"><i class="fas fa-phone"></i> Call</a> ${
-          isVisible('emergencyNumber')
-            ? data.emergencyNumber
-            : '<span class="text-muted">[Hidden]</span>'
-        }`
-      : '<span class="text-muted">Not provided</span>'
-  }</p>`;
-  html += `</div></div>`;
+html += `<div class="card shadow mt-3">
+  <div class="card-header hero text-white">Emergency Contact</div>
+  <div class="card-body">`;
+
+/* Name */
+html += `<p><b>Name:</b> ${
+  data.emergencyName
+    ? (isVisible('emergencyName')
+        ? data.emergencyName
+        : '<span class="text-muted">[Hidden]</span>')
+    : '<span class="text-muted">Not provided</span>'
+}</p>`;
+
+/* Relation */
+html += `<p><b>Relation:</b> ${
+  data.emergencyRelation
+    ? (isVisible('emergencyRelation')
+        ? data.emergencyRelation
+        : '<span class="text-muted">[Hidden]</span>')
+    : '<span class="text-muted">Not provided</span>'
+}</p>`;
+
+/* Number (unchanged logic, already correct) */
+html += `<p><b>Number:</b> ${
+  data.emergencyNumber
+    ? `<a href="tel:${data.emergencyNumber}" class="btn btn-sm btn-outline-danger me-2">
+        <i class="fas fa-phone"></i> Call
+      </a> ${
+        isVisible('emergencyNumber')
+          ? data.emergencyNumber
+          : '<span class="text-muted">[Hidden]</span>'
+      }`
+    : '<span class="text-muted">Not provided</span>'
+}</p>`;
+
+html += `</div></div>`;
 
   const s = data.socialLinks || {};
   let socials = "";
@@ -111,23 +134,37 @@ async function loadProfile() {
     html += `<div class="mt-3 connect text-center"><h5><i class="fas fa-share-alt"></i> Connect</h5><div class="social-icons">${socials}</div></div>`;
   }
 
-  html += `
-    <div class="text-center mt-4">
-      <button class="btn hero text-white me-2" onclick="sendOtp()"><i class="fas fa-edit"></i> Update Information</button>
-      <a href="/profile/${data.uniqueId}/qr" target="_blank" class="btn hero text-white"><i class="fas fa-qrcode"></i> View QR Profile</a>
-      ${data.mobile ? `
-        <a href="https://wa.me/${data.mobile}?text=${encodeURIComponent('Hi, I scanned your Gonnet QR.')}"
-           target="_blank"
-           class="btn hero text-white mt-2">
-           <i class="fab fa-whatsapp"></i> Message Owner
-        </a>` : ''}
-    </div>
+html += `
+  <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
 
-    <div id="otpSection" style="display:none;" class="mt-3 text-center">
-      <input type="text" id="otpInput" class="form-control w-50 mx-auto mb-2" placeholder="Enter OTP">
-      <button class="btn hero text-white" onclick="verifyOtp()">Verify OTP</button>
-    </div>
-  `;
+    <button class="btn hero text-white" onclick="sendOtp()">
+      <i class="fas fa-edit"></i> Update Information
+    </button>
+
+    <a href="/profile/${data.uniqueId}/qr"
+       target="_blank"
+       class="btn hero text-white">
+      <i class="fas fa-qrcode"></i> View QR Profile
+    </a>
+
+    ${data.mobile ? `
+      <a href="https://wa.me/${data.mobile}?text=${encodeURIComponent('Hi, I scanned your Gonnet QR.')}"
+         target="_blank"
+         class="btn hero text-white">
+        <i class="fab fa-whatsapp"></i> Message Owner
+      </a>
+    ` : ''}
+
+  </div>
+
+  <div id="otpSection" style="display:none;" class="mt-3 text-center">
+    <input type="text"
+           id="otpInput"
+           class="form-control w-50 mx-auto mb-2"
+           placeholder="Enter OTP">
+    <button class="btn hero text-white" onclick="verifyOtp()">Verify OTP</button>
+  </div>
+`;
 
   document.getElementById("profileData").innerHTML = html;
 }

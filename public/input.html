@@ -117,14 +117,19 @@
         <div class="card-header hero text-white"> Emergency Contact</div>
         <div class="card-body">
           <div class="row">
-            <div class="col-md-4 mb-3"><label class="form-label">Contact Name</label><input name="emergencyName" class="form-control" required></div>
-            <div class="col-md-4 mb-3"><label class="form-label">Relation</label><input name="emergencyRelation" class="form-control" required></div>
+            <div class="col-md-4 mb-3"><label class="form-label">Contact Name</label><input name="emergencyName" class="form-control" required>
+              <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyName" checked><label class="form-check-label">Visible to others</label></div>
+            </div>
+            <div class="col-md-4 mb-3"><label class="form-label">Relation</label><input name="emergencyRelation" class="form-control" required>
+              <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyRelation" checked><label class="form-check-label">Visible to others</label></div>
+            </div>
             <div class="col-md-4 mb-3"><label class="form-label">Contact Number</label><input name="emergencyNumber" class="form-control" required>
-              <div class="form-check"><input class="form-check-input" type="checkbox" name="visible_emergencyNumber" checked><label class="form-check-label">Visible to others</label></div>
+              <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyNumber" checked><label class="form-check-label">Visible to others</label></div>
             </div>
           </div>
         </div>
       </div>
+
 
       <!-- Social -->
       <div class="card shadow mt-3">

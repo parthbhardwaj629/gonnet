@@ -19,7 +19,7 @@ const GMAIL_USER = "hello.gonnet@gmail.com";
 const GMAIL_PASS = "skbr momu eagm lmfh";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://gonnet.in";
 
 // ----- Twilio WhatsApp (Sandbox) -----
 const twilio = require("twilio");

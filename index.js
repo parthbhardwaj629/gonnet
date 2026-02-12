@@ -19,7 +19,7 @@ const GMAIL_USER = "hello.gonnet@gmail.com";
 const GMAIL_PASS = "skbr momu eagm lmfh";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
-const BASE_URL = `http://localhost:3000`;
+const BASE_URL = "http://localhost:3000";
 
 // ----- Twilio WhatsApp (Sandbox) -----
 const twilio = require("twilio");
@@ -112,6 +112,32 @@ app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html"))
 );
 
+// 🔁 CENTRAL DECISION ROUTE
+app.get("/profile/:uniqueId", async (req, res) => {
+  try {
+    const { uniqueId } = req.params;
+
+    const customer = await Customer.findOne({ uniqueId }).lean();
+
+    if (!customer) {
+      return res.status(404).send("QR not found");
+    }
+
+    // If NOT registered → go to input
+    if (!customer.isRegistered) {
+      return res.redirect(`/profile/${uniqueId}/input`);
+    }
+
+    // If registered → go to display
+    return res.redirect(`/profile/${uniqueId}/view`);
+
+  } catch (err) {
+    console.error("Decision route error:", err);
+    res.status(500).send("Something went wrong");
+  }
+});
+
+
 // Generate unique profile + redirect to input
 app.get("/generate", async (req, res) => {
   try {
@@ -119,10 +145,14 @@ app.get("/generate", async (req, res) => {
     const newCustomer = new Customer({ uniqueId });
     await newCustomer.save();
 
-    const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
-    const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
-    const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
-    const qrImage = await QRCode.toDataURL(inputUrl);
+const mainUrl = `${BASE_URL}/profile/${uniqueId}`;
+const inputUrl = `${BASE_URL}/profile/${uniqueId}/input`;
+const profileUrl = `${BASE_URL}/profile/${uniqueId}/view`;
+const qrUrl = `${BASE_URL}/profile/${uniqueId}/qr`;
+
+const qrImage = await QRCode.toDataURL(mainUrl);
+
+
 
     // ---- Email to Admin ----
     (async () => {
@@ -186,7 +216,7 @@ app.get("/profile/:uniqueId/qr", (req, res) => {
 });
 
 app.get("/api/qr/:uniqueId", async (req, res) => {
-  const profileUrl = `${BASE_URL}/profile/${req.params.uniqueId}/view`;
+  const profileUrl = `${BASE_URL}/profile/${req.params.uniqueId}`;
   const qrImage = await QRCode.toDataURL(profileUrl);
   res.json({ qrImage });
 });
@@ -212,6 +242,20 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
   try {
     const { uniqueId } = req.params;
     const body = req.body || {};
+
+// 🔒 BLOCK DUPLICATE MOBILE NUMBERS (EXCEPT SAME PROFILE)
+if (body.mobile) {
+  const existingUser = await Customer.findOne({
+    mobile: body.mobile,
+    uniqueId: { $ne: uniqueId } // 👈 THIS IS THE KEY FIX
+  });
+
+  if (existingUser) {
+    return res.status(400).json({
+      error: "This mobile number is already registered. Please create a new profile."
+    });
+  }
+}
 
     body.socialLinks = {
       instagram: body.instagram || "",

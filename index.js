@@ -19,7 +19,7 @@ const GMAIL_USER = "hello.gonnet@gmail.com";
 const GMAIL_PASS = "skbr momu eagm lmfh";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
-const BASE_URL = "https://gonnet.in";
+const BASE_URL = "http://localhost:3000";
 
 // ----- Twilio WhatsApp (Sandbox) -----
 const twilio = require("twilio");
@@ -424,5 +424,89 @@ app.post("/api/verify-otp/:uniqueId", async (req, res) => {
     res.sendFile(path.join(__dirname, "public", `${p}.html`))
   )
 );
+
+const puppeteer = require("puppeteer");
+
+app.get("/internal/bulk-qr", async (req, res) => {
+  try {
+    const ADMIN_KEY = process.env.ADMIN_KEY || "parth_bulk_2026";
+    if (req.query.key !== ADMIN_KEY) {
+      return res.status(403).send("Unauthorized");
+    }
+
+    const count = parseInt(req.query.count) || 20;
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    const stickers = [];
+
+    for (let i = 0; i < count; i++) {
+      const uniqueId = uuidv4();
+
+      await Customer.create({
+        uniqueId,
+        isRegistered: false
+      });
+
+      stickers.push(`
+        <div class="sticker">
+          <iframe src="${BASE_URL}/profile/${uniqueId}/qr"
+                  width="345"
+                  height="180"
+                  style="border:none;">
+          </iframe>
+        </div>
+      `);
+    }
+
+    const html = `
+      <html>
+      <head>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+          }
+          .a3 {
+            width: 1190px;
+            height: 842px;
+            display: flex;
+            flex-wrap: wrap;
+          }
+          .sticker {
+            width: 345px;
+            height: 180px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="a3">
+          ${stickers.join("")}
+        </div>
+      </body>
+      </html>
+    `;
+
+    await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+
+    const pdf = await page.pdf({
+      width: "1190px",
+      height: "842px",
+      printBackground: true
+    });
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=gonnet-bulk-${count}.pdf`);
+    res.send(pdf);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Bulk generation failed");
+  }
+});
 
 app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

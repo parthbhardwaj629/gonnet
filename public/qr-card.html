@@ -23,17 +23,35 @@ body {
 
 /* ===== CARD ===== */
 .qr-card {
-  width: 92mm;
-  height: 45mm;
-  display: grid;
-  grid-template-columns: 64% 36%;
-  border: 1px solid #000;
-  background: #fff;
+  width: 345px;
+  height: 180px;
+  border-radius: 10px;
+  box-sizing: border-box;
+  display: flex;
+  /*grid-template-columns: 64% 36%;*/
+  border: 1px solid #fff;
   margin: auto;
   overflow: hidden;
+  background: linear-gradient(135deg, #1E88E5, #43A047);
 }
 
 /* ===== LEFT TEXT ===== */
+.qwerty {
+  color: #fff;
+  font-family: 'Segoe UI', sans-serif;
+  /*font-weight: bold;*/
+  /*font-family: Georgia, 'Times New Roman', Times, serif;*/
+  font-weight: 800;
+  font-size: 18pt;
+  letter-spacing: 1.5px;
+}
+
+.please {
+  font-size: x-small;
+  color: #ffb300df;
+  font-weight: 700;
+}
+
 .left {
   padding: 6mm;
   display: flex;
@@ -45,11 +63,12 @@ body {
   font-size: 14pt;
   font-weight: 800;
   line-height: 1;
+
 }
 
 .meta {
   font-size: 7pt;
-  color: #444;
+  color: #fff;
   margin-top: 2mm;
   line-height: 1.35;
 }
@@ -71,12 +90,12 @@ body {
 .note {
   margin-top: 2mm;
   font-size: 6.5pt;
-  color: #666;
+  color: #fff;
 }
 
 /* ===== RIGHT GRADIENT ===== */
 .right {
-  background: linear-gradient(135deg, #1E88E5, #43A047);
+  /*background: linear-gradient(135deg, #1E88E5, #43A047);*/
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -131,7 +150,10 @@ body {
 
   <!-- LEFT -->
   <div class="left">
-    <div class="brand gradient-text">GONNET</div>
+    <div class="qwerty" > 
+       GONNET <br> 
+      <!-- <div class = "please"> VOTE FOR VINOD KATARIA</div>-->
+      </div>
 
     <div class="meta">
       © 2025 Gonnet. All Rights Reserved.<br>

@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // ----- CONFIG (your existing values kept) -----
 const GMAIL_USER = "hello.gonnet@gmail.com";
-const GMAIL_PASS = "skbr momu eagm lmfh";
+const GMAIL_PASS = "artn nskw zpkr wtiu";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
@@ -46,6 +46,30 @@ function waTo(mob) {
   const digits = ("" + mob).replace(/\D/g, "").slice(-10);
   if (digits.length !== 10) return null;
   return "whatsapp:+91" + digits;
+}
+
+// Normalize mobile number for database
+function normalizeMobile(mobile) {
+  if (!mobile) return null;
+
+  let digits = mobile.replace(/\D/g, "");
+
+  // remove leading zero
+  if (digits.startsWith("0")) {
+    digits = digits.substring(1);
+  }
+
+  // if 10 digit Indian number
+  if (digits.length === 10) {
+    return "+91" + digits;
+  }
+
+  // if already has country code
+  if (digits.length > 10) {
+    return "+" + digits;
+  }
+
+  return digits;
 }
 // -------------------------------------------------------
 
@@ -111,6 +135,28 @@ const transporter = nodemailer.createTransport({
 app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html"))
 );
+
+app.get("/debug/email", async (req,res)=>{
+
+  try{
+
+    await transporter.sendMail({
+      from: `Gonnet <${GMAIL_USER}>`,
+      to: GMAIL_USER,
+      subject: "Test Email",
+      html: "<h2>Email working</h2>"
+    });
+
+    res.send("Email sent");
+
+  }catch(e){
+
+    console.log(e);
+    res.send("Email failed");
+
+  }
+
+});
 
 app.get("/privacy", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "privacy.html"));
@@ -246,8 +292,12 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
   try {
     const { uniqueId } = req.params;
     const body = req.body || {};
-
+if (body.carNumber) {
+  body.carNumber = body.carNumber.toUpperCase().replace(/\s+/g, "");
+}
 // 🔒 BLOCK DUPLICATE MOBILE NUMBERS (EXCEPT SAME PROFILE)
+body.mobile = normalizeMobile(body.mobile);
+body.emergencyNumber = normalizeMobile(body.emergencyNumber);
 if (body.mobile) {
   const existingUser = await Customer.findOne({
     mobile: body.mobile,

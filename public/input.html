@@ -86,7 +86,13 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Car Number</label>
-              <input name="carNumber" class="form-control" required>
+              <input 
+                    name="carNumber"
+                    class="form-control"
+                    required
+                    style="text-transform:uppercase"
+                    oninput="this.value = this.value.toUpperCase()"
+                    placeholder="e.g. DL01AB1234">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="visible_carNumber" checked>
                 <label class="form-check-label">Visible to others</label>

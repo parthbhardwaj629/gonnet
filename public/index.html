@@ -10,34 +10,51 @@
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg">
-    <div class="container">
-      <a class=" gradient-text" href="/">Gonnet</a>
-     
-      <div class="text-muted text-align text-">
-         <br>
-          Scan to Know More. Connect Instantly.
-        </div>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-          
-          <div class="text-center mt-3">
-        <button  class="btn">
-          <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-        </button>
-        </div>
+<nav class="navbar navbar-expand-lg">
+  <div class="container">
 
-            <div class="text-center mt-3">
-        <button  class="btn text-white">
-          <li class="nav-item"><a class="nav-link" href="/generate">Create QR</a></li>
-        </button>
-        </div>
-         
-          
-        </ul>
-      </div>
+    <a class="gradient-text" href="/">Gonnet</a>
+
+    <div class="text-muted">
+      <br>
+      Scan to Know More. Connect Instantly.
     </div>
-  </nav>
+
+    <!-- MOBILE HAMBURGER BUTTON -->
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarContent"
+      aria-controls="navbarContent"
+      aria-expanded="false"
+      aria-label="Toggle navigation">
+
+      <span class="navbar-toggler-icon"></span>
+
+    </button>
+
+    <!-- NAV ITEMS -->
+    <div class="collapse navbar-collapse" id="navbarContent">
+
+      <ul class="navbar-nav ms-auto">
+
+        <li class="nav-item">
+          <a class="nav-link" href="#features">Features</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)" onclick="openLogin()">Login</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/generate">Create QR</a>
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+</nav>
 
   <!-- Hero -->
   <section class="hero">
@@ -48,6 +65,33 @@
           <a href="/generate" class="text-white ">Create My QR Profile</a>
         </button>
   </section>
+
+<!-- LOGIN BLOCK -->
+<div id="loginBlock" class="container text-center mt-5" style="display:none; max-width:500px;">
+
+  <div class="card shadow p-4">
+
+    <h4 class="mb-3">Login to Gonnet</h4>
+
+    <input type="email" id="loginEmail" class="form-control mb-3" placeholder="Enter your email">
+
+    <button class="btn hero text-white w-100 mb-3" onclick="sendLoginOtp()">
+      Send OTP
+    </button>
+
+    <div id="otpSection" style="display:none;">
+
+      <input type="text" id="loginOtp" class="form-control mb-3" placeholder="Enter OTP">
+
+      <button class="btn hero text-white w-100" onclick="verifyLoginOtp()">
+        Verify OTP
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
   <!-- Features -->
   <section class="features container" id="features">
@@ -114,5 +158,77 @@
   For data removal requests: hello.gonnet@gmail.com
 </p>
   </footer>
+  <script>
+
+function openLogin(){
+
+  // hide hero
+  document.querySelector(".hero").style.display="none";
+
+  // hide features
+  document.querySelector(".features").style.display="none";
+
+  // show login block
+  document.getElementById("loginBlock").style.display="block";
+
+}
+
+async function sendLoginOtp(){
+
+  const email=document.getElementById("loginEmail").value;
+
+  const res=await fetch("/api/login/send-otp",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({email})
+  });
+
+  const data=await res.json();
+
+  alert(data.message || data.error);
+
+  if(res.ok){
+    document.getElementById("otpSection").style.display="block";
+  }
+
+}
+
+async function verifyLoginOtp(){
+
+  const email=document.getElementById("loginEmail").value;
+  const otp=document.getElementById("loginOtp").value;
+
+  const res=await fetch("/api/login/verify-otp",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({email,otp})
+  });
+
+  const data=await res.json();
+
+  if(data.success){
+
+    // SAVE EMAIL
+    localStorage.setItem("gonnetUserEmail", email);
+
+    // DEBUG
+    console.log("Saved email:", localStorage.getItem("gonnetUserEmail"));
+
+    // REDIRECT
+    window.location.href="/dashboard";
+
+  }else{
+
+    alert(data.error || "OTP invalid");
+
+  }
+
+}
+
+</script>
 </body>
 </html>

@@ -136,6 +136,35 @@ app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html"))
 );
 
+app.get("/dashboard",(req,res)=>{
+res.sendFile(path.join(__dirname,"public","dashboard.html"));
+});
+
+
+ app.post("/api/dashboard-data", async (req,res)=>{
+
+  const {email}=req.body;
+
+  if(!email){
+    return res.status(400).json({error:"Email missing"});
+  }
+
+  const vehicles=await Customer.find({email}).lean();
+
+  res.json({vehicles});
+
+});
+
+app.delete("/api/delete-profile/:id", async (req,res)=>{
+
+  const {id}=req.params;
+
+  await Customer.deleteOne({uniqueId:id});
+
+  res.json({message:"Vehicle deleted"});
+
+});
+
 app.get("/debug/email", async (req,res)=>{
 
   try{
@@ -222,7 +251,7 @@ const qrImage = await QRCode.toDataURL(mainUrl);
             <p><b>QR Image:</b></p>
             <img src="${qrImage}" alt="QR" style="width:200px;height:200px;"/>
             <br><br>
-            <p style="color:#777;">© Gonnet — Powered by Ganga Motors</p>
+            <p style="color:#777;">© Gonnet</p>
           `,
         });
 
@@ -276,6 +305,31 @@ app.get("/api/profile/:uniqueId", async (req, res) => {
   const c = await Customer.findOne({ uniqueId: req.params.uniqueId }).lean();
   if (!c) return res.status(404).json({ error: "Profile not found" });
   res.json(c);
+});
+
+app.post("/api/dashboard", async (req,res)=>{
+
+try{
+
+const {email} = req.body;
+
+if(!email){
+return res.status(400).json({error:"Email required"});
+}
+
+const vehicles = await Customer.find({
+email:email
+}).lean();
+
+res.json({vehicles});
+
+}catch(err){
+
+console.log(err);
+res.status(500).json({error:"Dashboard fetch failed"});
+
+}
+
 });
 
 app.get("/debug/wa", async (req, res) => {
@@ -374,7 +428,7 @@ if (body.mobile) {
                   <li><b>Bio:</b> ${body.bio || "-"}</li>
                 </ul>
                 <p><a href="${profileUrl}">👉 View Your Profile</a></p>
-                <p style="font-size:12px;color:#777;">© Gonnet — Powered by Ganga Motors</p>
+                <p style="font-size:12px;color:#777;">© Gonnet</p>
               </div>`,
           });
         }
@@ -470,6 +524,110 @@ app.post("/api/verify-otp/:uniqueId", async (req, res) => {
   } catch {
     res.status(500).json({ error: "Failed to verify OTP" });
   }
+});
+
+
+// ============================
+// LOGIN OTP (EMAIL BASED)
+// ============================
+
+// Send login OTP
+app.post("/api/login/send-otp", async (req,res)=>{
+
+  try{
+
+    const {email}=req.body;
+
+    if(!email){
+      return res.status(400).json({error:"Email required"});
+    }
+
+    const customers=await Customer.find({email}).lean();
+
+    if(!customers || customers.length===0){
+      return res.status(404).json({error:"No profiles found for this email"});
+    }
+
+    const otp=Math.floor(100000 + Math.random()*900000).toString();
+
+    // store OTP temporarily
+    await Customer.updateMany(
+      {email},
+      {
+        $set:{
+          otp:otp,
+          otpExpiry:Date.now()+5*60*1000
+        }
+      }
+    );
+
+    // send email
+    await transporter.sendMail({
+
+      from:`Gonnet <${GMAIL_USER}>`,
+      to:email,
+      subject:"Gonnet Login OTP",
+      html:`
+        <h2>Your Gonnet Login OTP</h2>
+        <p>Your OTP is:</p>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `
+    });
+
+    res.json({message:"OTP sent"});
+
+  }catch(e){
+
+    console.log(e);
+    res.status(500).json({error:"Failed to send OTP"});
+
+  }
+
+});
+
+
+// Verify login OTP
+app.post("/api/login/verify-otp", async (req,res)=>{
+
+  try{
+
+    const {email,otp}=req.body;
+
+    if(!email || !otp){
+      return res.status(400).json({error:"Missing data"});
+    }
+
+    const customer=await Customer.findOne({email});
+
+    if(!customer){
+      return res.status(404).json({error:"User not found"});
+    }
+
+    if(customer.otp!==otp || Date.now()>customer.otpExpiry){
+      return res.status(400).json({error:"Invalid or expired OTP"});
+    }
+
+    // clear otp
+    await Customer.updateMany(
+      {email},
+      {
+        $set:{
+          otp:null,
+          otpExpiry:null
+        }
+      }
+    );
+
+    res.json({success:true});
+
+  }catch(e){
+
+    console.log(e);
+    res.status(500).json({error:"OTP verification failed"});
+
+  }
+
 });
 
 // Static feature pages

@@ -104,6 +104,9 @@ const customerSchema = new mongoose.Schema({
   emergencyNumber: String,
   bio: String,
   photo: String,
+  scanCount: { type: Number, default: 0 },
+    lastScanAt: Date,
+    lastScanIP: String,
   socialLinks: {
     instagram: String,
     linkedin: String,
@@ -193,6 +196,8 @@ app.get("/privacy", (req, res) => {
 
 // 🔁 CENTRAL DECISION ROUTE
 app.get("/profile/:uniqueId", async (req, res) => {
+
+  
   try {
     const { uniqueId } = req.params;
 
@@ -214,6 +219,17 @@ app.get("/profile/:uniqueId", async (req, res) => {
     console.error("Decision route error:", err);
     res.status(500).send("Something went wrong");
   }
+
+  await Customer.updateOne(
+  { uniqueId },
+  {
+    $inc: { scanCount: 1 },
+    $set: {
+      lastScanAt: new Date(),
+      lastScanIP: req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    }
+  }
+);
 });
 
 

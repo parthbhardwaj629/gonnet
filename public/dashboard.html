@@ -98,6 +98,14 @@ async function loadDashboard(){
             Owner: ${v.name || "-"}
           </p>
 
+          <p class="text-muted">
+            Scans: ${v.scanCount || 0}
+          </p>
+
+          <p class="text-muted">
+            Last Scan: ${v.lastScanAt ? new Date(v.lastScanAt).toLocalString() : "Never"}
+          </p>
+
 <div class="d-flex justify-content-between mt-3">
 
 <a href="/profile/${v.uniqueId}/view"

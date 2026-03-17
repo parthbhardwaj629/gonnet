@@ -120,6 +120,9 @@ const customerSchema = new mongoose.Schema({
   otp: String,
   otpExpiry: Date,
 });
+customerSchema.index({ uniqueId: 1 });
+customerSchema.index({ email: 1 });
+customerSchema.index({ mobile: 1 });
 const Customer = mongoose.model("Customer", customerSchema);
 
 

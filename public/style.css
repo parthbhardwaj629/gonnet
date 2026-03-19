@@ -64,12 +64,14 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.nav-link {
-  font-size: 1.2rem;
+/* NAVBAR FIX */
+.navbar .nav-link {
+  font-size: 1rem;
   color: #1E88E5 !important;
-  margin-left: 20px;
+  margin-left: 15px;
   font-weight: 500;
 }
+
 .nav-link:hover {
   text-decoration: underline;
 }
@@ -96,14 +98,21 @@ body {
 .btn-main {
   background: #FB8C00;
   color: white;
-  font-weight: bold;
-  padding: 12px 30px;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  margin-top: 20px;
+  font-weight: 600;
+  padding: 8px 18px;   /* 👈 smaller */
+  border-radius: 6px;
+  font-size: 0.95rem;  /* 👈 smaller */
+  margin-left: 15px;
+  display: inline-flex;
+  align-items: center;
 }
 .btn-main:hover { background: #E65100; }
 
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+}
 
 .brand-footer {
   background: #212121;
@@ -172,4 +181,11 @@ footer {
 footer span {
   color: #FFB300;
   font-weight: bold;
+
 }
+  .navbar .btn-main {
+  padding: 8px 20px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+

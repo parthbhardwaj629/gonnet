@@ -656,6 +656,10 @@ app.post("/api/login/verify-otp", async (req,res)=>{
   )
 );
 
+app.get("/about", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "about.html"));
+});
+
 const puppeteer = require("puppeteer");
 
 app.get("/internal/bulk-qr", async (req, res) => {

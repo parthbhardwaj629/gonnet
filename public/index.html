@@ -38,7 +38,11 @@
       <ul class="navbar-nav ms-auto">
 
         <li class="nav-item">
-          <a class="nav-link" href="#features">Features</a>
+  <a class="nav-link" href="/about">About</a>
+</li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="javascript:void(0)" onclick="goToFeatures()">Features</a>
         </li>
 
         <li class="nav-item">
@@ -226,6 +230,22 @@ async function verifyLoginOtp(){
     alert(data.error || "OTP invalid");
 
   }
+
+}
+
+function goToFeatures(){
+
+  // show hero & features
+  document.querySelector(".hero").style.display = "block";
+  document.querySelector(".features").style.display = "block";
+
+  // hide login
+  document.getElementById("loginBlock").style.display = "none";
+
+  // scroll
+  document.getElementById("features").scrollIntoView({
+    behavior: "smooth"
+  });
 
 }
 

@@ -104,6 +104,7 @@ const customerSchema = new mongoose.Schema({
   emergencyNumber: String,
   bio: String,
   photo: String,
+  isActive: { type: Boolean, default: true },
   scanCount: { type: Number, default: 0 },
     lastScanAt: Date,
     lastScanIP: String,
@@ -155,7 +156,10 @@ res.sendFile(path.join(__dirname,"public","dashboard.html"));
     return res.status(400).json({error:"Email missing"});
   }
 
-  const vehicles=await Customer.find({email}).lean();
+  const vehicles = await Customer.find({
+  email,
+  isActive: true
+}).lean();
 
   res.json({vehicles});
 
@@ -165,9 +169,13 @@ app.delete("/api/delete-profile/:id", async (req,res)=>{
 
   const {id}=req.params;
 
-  await Customer.deleteOne({uniqueId:id});
+  await Customer.updateOne(
+  { uniqueId: id },
+  { $set: { isActive: false } }
+);
 
-  res.json({message:"Vehicle deleted"});
+res.json({ message: "Profile deactivated" });
+  
 
 });
 
@@ -208,6 +216,10 @@ app.get("/profile/:uniqueId", async (req, res) => {
 
     if (!customer) {
       return res.status(404).send("QR not found");
+    }
+
+    if (!customer.isActive) {
+      return res.send("This profile is no longer active")
     }
 
     // If NOT registered → go to input
@@ -368,6 +380,23 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
 if (body.carNumber) {
   body.carNumber = body.carNumber.toUpperCase().replace(/\s+/g, "");
 }
+
+// 🚗 BLOCK DUPLICATE CAR NUMBER
+if (body.carNumber) {
+
+  const existingCar = await Customer.findOne({
+    carNumber: body.carNumber,
+    uniqueId: { $ne: uniqueId }
+  });
+
+  if (existingCar) {
+    return res.status(400).json({
+      error: "This vehicle is already registered"
+    });
+  }
+
+}
+
 // 🔒 BLOCK DUPLICATE MOBILE NUMBERS (EXCEPT SAME PROFILE)
 body.mobile = normalizeMobile(body.mobile);
 body.emergencyNumber = normalizeMobile(body.emergencyNumber);

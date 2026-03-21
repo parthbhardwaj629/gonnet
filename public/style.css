@@ -189,3 +189,17 @@ footer span {
   border-radius: 6px;
 }
 
+/* CTA CARD (right side small box) */
+.cta-card {
+  max-width: 300px;
+  margin: 20px auto;
+  padding: 18px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+}
+
+.cta-card .btn-main {
+  margin-top: 15px;
+}

@@ -501,23 +501,37 @@ app.post("/api/send-otp/:uniqueId", async (req, res) => {
     customer.otpExpiry = Date.now() + 5 * 60 * 1000;
     await customer.save();
 
+    // ✅ RESPONSE FIRST (FAST)
     res.json({ message: "OTP sent" });
 
-    // Email OTP
-    if (customer.email) {
-      await transporter.sendMail({
-        from: `Gonnet <${GMAIL_USER}>`,
-        to: customer.email,
-        subject: "OTP for Profile Update",
-        html: `<p>Your OTP is <b>${otp}</b></p>`,
-      });
-    }
+    // ✅ BACKGROUND TASKS (NO DELAY)
+    (async () => {
+      try {
 
-    // WhatsApp OTP (if mobile exists & joined sandbox)
-    const userWA = waTo(customer.mobile);
-    if (userWA) {
-      await sendWA(userWA, `Your Gonnet OTP is ${otp}. It is valid for 5 minutes.`);
-    }
+        // Email
+        if (customer.email) {
+          await transporter.sendMail({
+            from: `Gonnet <${GMAIL_USER}>`,
+            to: customer.email,
+            subject: "OTP for Profile Update",
+            html: `<p>Your OTP is <b>${otp}</b></p>`,
+          });
+        }
+
+        // WhatsApp
+        const userWA = waTo(customer.mobile);
+        if (userWA) {
+          await sendWA(
+            userWA,
+            `Your Gonnet OTP is ${otp}. It is valid for 5 minutes.`
+          );
+        }
+
+      } catch (err) {
+        console.error("OTP background error:", err);
+      }
+    })();
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to send OTP" });
@@ -569,7 +583,7 @@ app.post("/api/login/send-otp", async (req,res)=>{
 
     const otp=Math.floor(100000 + Math.random()*900000).toString();
 
-    // store OTP temporarily
+    // store OTP
     await Customer.updateMany(
       {email},
       {
@@ -580,21 +594,27 @@ app.post("/api/login/send-otp", async (req,res)=>{
       }
     );
 
-    // send email
-    await transporter.sendMail({
-
-      from:`Gonnet <${GMAIL_USER}>`,
-      to:email,
-      subject:"Gonnet Login OTP",
-      html:`
-        <h2>Your Gonnet Login OTP</h2>
-        <p>Your OTP is:</p>
-        <h1>${otp}</h1>
-        <p>This OTP is valid for 5 minutes.</p>
-      `
-    });
-
+    // ✅ SEND RESPONSE FIRST (FAST)
     res.json({message:"OTP sent"});
+
+    // ✅ EMAIL IN BACKGROUND (NO DELAY)
+    (async () => {
+      try{
+        await transporter.sendMail({
+          from:`Gonnet <${GMAIL_USER}>`,
+          to:email,
+          subject:"Gonnet Login OTP",
+          html:`
+            <h2>Your Gonnet Login OTP</h2>
+            <p>Your OTP is:</p>
+            <h1>${otp}</h1>
+            <p>This OTP is valid for 5 minutes.</p>
+          `
+        });
+      }catch(err){
+        console.log("Email error:", err);
+      }
+    })();
 
   }catch(e){
 

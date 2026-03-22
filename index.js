@@ -104,6 +104,7 @@ const customerSchema = new mongoose.Schema({
   emergencyNumber: String,
   bio: String,
   photo: String,
+  brandName: String,
   isActive: { type: Boolean, default: true },
   scanCount: { type: Number, default: 0 },
     lastScanAt: Date,
@@ -158,7 +159,10 @@ res.sendFile(path.join(__dirname,"public","dashboard.html"));
 
   const vehicles = await Customer.find({
   email,
-  isActive: true
+  $or: [
+    { isActive: true },
+    { isActive: { $exists: false } }
+  ]
 }).lean();
 
   res.json({vehicles});
@@ -252,7 +256,11 @@ app.get("/profile/:uniqueId", async (req, res) => {
 app.get("/generate", async (req, res) => {
   try {
     const uniqueId = uuidv4();
-    const newCustomer = new Customer({ uniqueId });
+    const newCustomer = new Customer({
+       uniqueId,
+      brandName: "Gonnet",
+    isActive: true
+   });
     await newCustomer.save();
 
 const mainUrl = `${BASE_URL}/profile/${uniqueId}`;
@@ -726,12 +734,16 @@ app.get("/internal/bulk-qr", async (req, res) => {
     const stickers = [];
 
     for (let i = 0; i < count; i++) {
-      const uniqueId = uuidv4();
+      const brand = req.query.brand || "Gonnet";
 
-      await Customer.create({
-        uniqueId,
-        isRegistered: false
-      });
+const uniqueId = uuidv4();
+
+await Customer.create({
+  uniqueId,
+  brandName: brand,
+  isRegistered: false,
+  isActive: true
+});
 
       stickers.push(`
         <div class="sticker">

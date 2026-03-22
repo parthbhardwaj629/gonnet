@@ -161,11 +161,16 @@ body {
       <!-- <div class = "please"> VOTE FOR VINOD KATARIA</div>-->
       </div>
 
-     <div class="meta">
+    
+    <div class="meta" id="brandBlock">
+  Gonnet. All Rights Reserved.<br>
+</div>
+    
+     <!-- <div class="meta">
       Gonnet. All Rights Reserved.<br>
      <span class="powered">Powered by Ganga Motors</span><br>
       Gurgaon’s 1st Maruti Authorized Workshop
-    </div>
+    </div>-->
 
    <!-- <div class="meta"> 
     <span class="customized" >
@@ -202,16 +207,42 @@ NISHU AUTOMOBILE WORKS </span>
 
 <script>
 async function loadQR() {
-  const uniqueId = window.location.pathname.split("/")[2];
-  const res = await fetch(`/api/qr/${uniqueId}`);
-  const data = await res.json();
 
-  if (data.qrImage) {
+  const uniqueId = window.location.pathname.split("/")[2];
+
+  // QR fetch
+  const qrRes = await fetch(`/api/qr/${uniqueId}`);
+  const qrData = await qrRes.json();
+
+  if (qrData.qrImage) {
     document.getElementById("qrBox").innerHTML =
-      `<img src="${data.qrImage}" alt="QR Code">`;
+      `<img src="${qrData.qrImage}" alt="QR Code">`;
   } else {
     document.getElementById("qrBox").innerText = "QR Error";
   }
+
+  // 🔥 PROFILE FETCH (IMPORTANT)
+  const profileRes = await fetch(`/api/profile/${uniqueId}`);
+  const profile = await profileRes.json();
+
+  const brand = profile.brandName || "Gonnet";
+
+  // 🔥 DYNAMIC BRAND LOGIC
+  if (brand !== "Gonnet") {
+
+    document.getElementById("brandBlock").innerHTML = `
+      Gonnet. All Rights Reserved.<br>
+      <span class="powered">Powered by ${brand}</span>
+    `;
+
+  } else {
+
+    document.getElementById("brandBlock").innerHTML = `
+      Gonnet. All Rights Reserved.
+    `;
+
+  }
+
 }
 loadQR();
 </script>

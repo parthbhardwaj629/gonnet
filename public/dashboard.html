@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Dashboard - Gonnet</title>
 
   <link rel="stylesheet" href="/style.css">
@@ -30,11 +33,11 @@
 </nav>
 
 
-<div class="container mt-5">
+ <div class="container-fluid px-3 px-md-4 mt-4 mt-md-5"></div>
 
-  <h2 class="mb-4">Welcome back 👋</h2>
+  <h2 class="mb-3 fw-bold">Welcome back 👋</h2>
 
-  <div class="row" id="vehicleContainer"></div>
+  <div class="row g-3" id="vehicleContainer"></div>
 
 </div>
 
@@ -74,9 +77,9 @@ async function loadDashboard(){
 
     container.innerHTML+=`
 
-    <div class="col-md-4 mb-4">
+    <div class="col-12 col-md-4 mb-4">
 
-      <div class="card shadow-lg border-0 rounded-4">
+      <div class="card shadow-lg border-0 rounded-4 h-100">
 
         <div class="card-body">
 
@@ -106,25 +109,25 @@ async function loadDashboard(){
             Last Scan: ${v.lastScanAt ? new Date(v.lastScanAt).toLocaleString() : "Never"}
           </p>
 
-<div class="d-flex justify-content-between mt-3">
+<div class="d-grid gap-2 mt-3">
 
 <a href="/profile/${v.uniqueId}/view"
-class="btn btn-sm btn-outline-primary">
+class="btn btn-sm btn-outline-primary w-100">
 View
 </a>
 
 <button onclick="downloadQR('${v.uniqueId}')"
-class="btn btn-sm btn-outline-success">
-QR
+class="btn btn-sm btn-outline-success w-100">
+Download QR
 </button>
 
 <a href="/profile/${v.uniqueId}/input?fromOtp=true"
-class="btn btn-sm btn-outline-dark">
+class="btn btn-sm btn-outline-dark w-100">
 Edit
 </a>
 
 <button onclick="deleteVehicle('${v.uniqueId}')"
-class="btn btn-sm btn-outline-danger">
+class="btn btn-sm btn-outline-danger w-100">
 Delete
 </button>
 
@@ -143,7 +146,7 @@ Delete
 
   container.innerHTML+=`
 
-  <div class="col-md-4 mb-4">
+  <div class="col-12 col-md-4 mb-4">
 
   <a href="/generate" style="text-decoration:none;">
 

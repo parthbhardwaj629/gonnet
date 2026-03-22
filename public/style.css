@@ -203,3 +203,17 @@ footer span {
 .cta-card .btn-main {
   margin-top: 15px;
 }
+
+.card {
+  transition: 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+}
+
+@media (max-width: 576px) {
+  .card {
+    border-radius: 16px;
+  }
+}

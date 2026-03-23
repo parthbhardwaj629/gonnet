@@ -385,41 +385,49 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
   try {
     const { uniqueId } = req.params;
     const body = req.body || {};
-if (body.carNumber) {
-  body.carNumber = body.carNumber.toUpperCase().replace(/\s+/g, "");
-}
 
-// 🚗 BLOCK DUPLICATE CAR NUMBER
-if (body.carNumber) {
+    // 🚗 NORMALIZE
+    if (body.carNumber) {
+      body.carNumber = body.carNumber.toUpperCase().replace(/\s+/g, "");
+    }
 
-  const existingCar = await Customer.findOne({
-    carNumber: body.carNumber,
-    uniqueId: { $ne: uniqueId }
-  });
+    body.mobile = normalizeMobile(body.mobile);
+    body.emergencyNumber = normalizeMobile(body.emergencyNumber);
 
-  if (existingCar) {
-    return res.status(400).json({
-      error: "This vehicle is already registered"
-    });
-  }
+    // ✅ FETCH ONCE
+    const currentProfile = await Customer.findOne({ uniqueId });
 
-}
+    // 🚗 CAR CHECK
+    if (body.carNumber && currentProfile?.carNumber !== body.carNumber) {
+      const existingCar = await Customer.findOne({ carNumber: body.carNumber });
 
-// 🔒 BLOCK DUPLICATE MOBILE NUMBERS (EXCEPT SAME PROFILE)
-body.mobile = normalizeMobile(body.mobile);
-body.emergencyNumber = normalizeMobile(body.emergencyNumber);
-if (body.mobile) {
+      if (existingCar) {
+        return res.status(400).json({
+          error: "This vehicle is already registered"
+        });
+      }
+    }
+
+  
+
+// 📱 MOBILE CHECK (ONLY IF CHANGED)
+if (
+  body.mobile &&
+  normalizeMobile(currentProfile?.mobile) !== normalizeMobile(body.mobile)
+) {
   const existingUser = await Customer.findOne({
     mobile: body.mobile,
-    uniqueId: { $ne: uniqueId } // 👈 THIS IS THE KEY FIX
+    uniqueId: { $ne: uniqueId } // 🔥 IMPORTANT FIX
   });
 
   if (existingUser) {
     return res.status(400).json({
-      error: "This mobile number is already registered. Please create a new profile."
+      error: "This mobile number is already registered."
     });
   }
 }
+
+    // बाकी tera existing code yahan se continue hoga
 
     body.socialLinks = {
       instagram: body.instagram || "",

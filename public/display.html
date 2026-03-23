@@ -78,7 +78,7 @@ async function loadProfile() {
       : '<span class="text-muted">[Hidden]</span>'
   }</p>`;
   html += `<p><b>Car Number:</b> ${isVisible('carNumber') ? (data.carNumber || '') : '<span class="text-muted">[Hidden]</span>'}</p>`;
-  html += `<p><b>Email:</b> ${isVisible('email') ? (data.email || '') : '<span class="text-muted">[Hidden]</span>'}</p>`;
+  // html += `<p><b>Email:</b> ${isVisible('email') ? (data.email || '') : '<span class="text-muted">[Hidden]</span>'}</p>`;
   html += `</div></div>`;
 
   if (data.bio?.trim()) {

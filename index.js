@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 // ----- CONFIG (your existing values kept) -----
 const GMAIL_USER = "hello.gonnet@gmail.com";
-const GMAIL_PASS = "artn nskw zpkr wtiu";
+const GMAIL_PASS = "hymteiykjuvouedk";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
 const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
@@ -132,10 +132,9 @@ const Customer = mongoose.model("Customer", customerSchema);
 const transporter = nodemailer.createTransport({
   service: "gmail",
   pool: true,
-  maxConnections: 3,
-  maxMessages: 100,
-  auth: { user: GMAIL_USER, pass: GMAIL_PASS },
-  socketTimeout: 30000
+  maxConnections: 5,
+  maxMessages: 200,
+  auth: { user: GMAIL_USER, pass: GMAIL_PASS }
 });
 // ---------- ROUTES ----------
 
@@ -295,10 +294,10 @@ const qrImage = await QRCode.toDataURL(mainUrl);
         });
 
         // ---- WhatsApp to Admin ----
-        await sendWA(
-          ADMIN_WA,
-          `New QR Created\nID: ${uniqueId}\nInput: ${inputUrl}\nView: ${profileUrl}\nQR: ${qrUrl}`
-        );
+    //    await sendWA(
+    //      ADMIN_WA,
+    //      `New QR Created\nID: ${uniqueId}\nInput: ${inputUrl}\nView: ${profileUrl}\nQR: ${qrUrl}`
+    //    );
 
         console.log("📩 Admin notified for new QR");
       } catch (mailErr) {
@@ -536,7 +535,9 @@ if (
 });
 
 // OTP Send
+
 app.post("/api/send-otp/:uniqueId", async (req, res) => {
+  
   try {
     const customer = await Customer.findOne({ uniqueId: req.params.uniqueId });
     if (!customer) return res.status(404).json({ error: "Customer not found" });
@@ -554,14 +555,18 @@ app.post("/api/send-otp/:uniqueId", async (req, res) => {
       try {
 
         // Email
-        if (customer.email) {
-          await transporter.sendMail({
-            from: `Gonnet <${GMAIL_USER}>`,
-            to: customer.email,
-            subject: "OTP for Profile Update",
-            html: `<p>Your OTP is <b>${otp}</b></p>`,
-          });
-        }
+        try {
+  await transporter.sendMail({
+    from: `Gonnet <${GMAIL_USER}>`,
+    to: customer.email,
+    subject: "OTP for Profile Update",
+    html: `<p>Your OTP is <b>${otp}</b></p>`,
+  });
+
+  console.log("EMAIL SENT");
+} catch (err) {
+  console.log("EMAIL ERROR:", err.message);
+}
 
         // WhatsApp
         const userWA = waTo(customer.mobile);
@@ -581,6 +586,7 @@ app.post("/api/send-otp/:uniqueId", async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Failed to send OTP" });
   }
+  
 });
 
 // OTP Verify

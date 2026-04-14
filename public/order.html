@@ -123,6 +123,10 @@
 
   </footer>
 
+  <script>
+    window.RAZORPAY_KEY_ID = "rzp_live_SdMMVQBobkVXo1"
+  </script>
+
 <script>
 
 function validateForm(){
@@ -204,7 +208,7 @@ if(!order || !order.id){
 }
 
   const options = {
-    key: "rzp_live_SdLxcGtI15QblX",
+    key: window.RAZORPAY_KEY_ID,
     amount: order.amount,
     currency: "INR",
     order_id: order.id,
@@ -219,17 +223,24 @@ if(!order || !order.id){
         </div>
       `;
 
-      await fetch("/api/save-order", {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({
-          name, email, mobile, address, city, state, pincode,
-          quantity, total,
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          signature: response.razorpay_signature
-        })
-      });
+      const saveRes = await fetch("/api/save-order", {
+  method:"POST",
+  headers:{ "Content-Type":"application/json" },
+  body: JSON.stringify({
+    name, email, mobile, address, city, state, pincode,
+    quantity, total,
+    paymentId: response.razorpay_payment_id,
+    orderId: response.razorpay_order_id,
+    signature: response.razorpay_signature
+  })
+});
+
+const saveData = await saveRes.json();
+
+if(!saveData.success){
+  alert("⚠️ Payment done but saving failed. Contact support.");
+  return;
+}
 
       document.body.innerHTML = `
         <div style="text-align:center; padding:60px;">
@@ -245,6 +256,12 @@ if(!order || !order.id){
   };
 
   const rzp = new Razorpay(options);
+
+  rzp.on('payment.failed', function (response){
+  alert("❌ Payment failed. Try again.");
+  console.log(response.error);
+});
+
   rzp.open();
 }
 

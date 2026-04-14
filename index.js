@@ -11,10 +11,12 @@ const Order = require("./models/Order");
 const Razorpay = require("razorpay");
 const PDFDocument = require("pdfkit");
 
-const razorpay = new Razorpay ({
-  key_id: "rzp_live_SdLxcGtI15QblX",
-key_secret: "gfq0w6b9ah14HLGs01lXnfuO"
- });
+require("dotenv").config();
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 //const razorpay = new Razorpay({
 //  key_id: "rzp_test_SdLiHDdbY4X8uR",
@@ -207,7 +209,7 @@ app.post("/api/save-order", async (req, res) => {
     const body = orderId + "|" + paymentId;
 
     const expectedSignature = crypto
-      .createHmac("sha256", "gfq0w6b9ah14HLGs01lXnfuO")
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest("hex");
 
@@ -455,7 +457,7 @@ printDoc.font("Helvetica-Bold")
 printDoc.font("Helvetica")
   .fontSize(10)
   .text(
-    "Welcome to Gonnet.\nThank you for choosing Gonnet. Your QR sticker is designed to help you stay connected. \n Simply scan and set up your profile. \n  Thank you for choosing Gonnet.\n— Team Gonnet"
+    "Welcome to Gonnet.\nThank you for choosing Gonnet. Your QR sticker is designed to help you stay connected. \nSimply scan and set up your profile. \nThank you for choosing Gonnet.\n   — Team Gonnet"
   );
 
 

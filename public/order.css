@@ -1,0 +1,45 @@
+body {
+  background: #f8f9fa;
+}
+
+.order-container {
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.order-title {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.order-btn {
+  background: #FFB300;
+  border: none;
+  font-weight: bold;
+}
+
+.order-btn:hover {
+  background: #e6a800;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-container {
+  flex: 1;
+}

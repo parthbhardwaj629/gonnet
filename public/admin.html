@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gonnet Admin</title>
+
+  <link rel="stylesheet" href="/style.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+
+<body style="padding:30px;">
+
+  <h2>📊 Gonnet Orders Dashboard</h2>
+
+  <!-- FILTER -->
+  <div class="row mt-4">
+    <div class="col-md-3">
+      <input type="date" id="startDate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <input type="date" id="endDate" class="form-control">
+    </div>
+
+    <div class="col-md-3">
+      <button class="btn btn-warning" onclick="fetchOrders()">Filter</button>
+    </div>
+
+    <div class="col-md-3">
+      <button class="btn btn-dark" onclick="printPage()">Print</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="mt-4">
+    <h5>Total Orders: <span id="totalOrders">0</span></h5>
+    <h5>Total Revenue: ₹<span id="totalRevenue">0</span></h5>
+  </div>
+
+  <!-- TABLE -->
+  <table class="table table-bordered mt-4">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Qty</th>
+        <th>Total</th>
+        <th>Address</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+
+    <tbody id="ordersTable"></tbody>
+  </table>
+
+<script>
+
+async function fetchOrders(){
+
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+
+  const res = await fetch("/api/admin/orders", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ startDate, endDate })
+  });
+
+  const data = await res.json();
+
+  const orders = data.orders;
+
+  let html = "";
+  let totalRevenue = 0;
+
+  orders.forEach(o => {
+
+    totalRevenue += o.total;
+
+    html += `
+      <tr>
+        <td>${o.name}</td>
+        <td>${o.email}</td>
+        <td>${o.quantity}</td>
+        <td>₹${o.total}</td>
+        <td>${o.address}, ${o.city}</td>
+        <td>${new Date(o.createdAt).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("ordersTable").innerHTML = html;
+  document.getElementById("totalOrders").innerText = orders.length;
+  document.getElementById("totalRevenue").innerText = totalRevenue;
+}
+
+function printPage(){
+  window.print();
+}
+
+// LOAD TODAY BY DEFAULT
+window.onload = () => {
+
+  const today = new Date().toISOString().split("T")[0];
+
+  document.getElementById("startDate").value = today;
+  document.getElementById("endDate").value = today;
+
+  fetchOrders();
+};
+
+</script>
+
+</body>
+</html>

@@ -7,12 +7,28 @@ const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
 const multer = require("multer");
 const QRCode = require("qrcode");
+const Order = require("./models/Order");
+const Razorpay = require("razorpay");
+const PDFDocument = require("pdfkit");
+
+const razorpay = new Razorpay ({
+  key_id: "rzp_live_SdLxcGtI15QblX",
+key_secret: "gfq0w6b9ah14HLGs01lXnfuO"
+ });
+
+//const razorpay = new Razorpay({
+//  key_id: "rzp_test_SdLiHDdbY4X8uR",
+//  key_secret: "pjSPHrKGNXLT70peaeDSOYUH"
+//});
+
+
 
 // --- env (for Twilio keys) ---
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
 
 // ----- CONFIG (your existing values kept) -----
 const GMAIL_USER = "hello.gonnet@gmail.com";
@@ -142,6 +158,407 @@ const transporter = nodemailer.createTransport({
 app.get("/", (req, res) =>
   res.sendFile(path.join(__dirname, "public", "index.html"))
 );
+
+app.get("/order", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "order.html"));
+});
+
+app.post("/api/create-order", async (req, res) => {
+ //  console.log("🔥 CREATE ORDER HIT");
+
+  try {
+    const { total } = req.body;
+
+    const options = {
+      amount: total * 100,
+      currency: "INR",
+      receipt: "order_" + Date.now()
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.json(order);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Order creation failed" });
+  }
+});
+
+app.post("/api/save-order", async (req, res) => {
+  try {
+
+    console.log("📨 EMAIL:", req.body.email); // ✅ ADD HERE
+    console.log("🧾 FULL BODY:", req.body);   // 🔥 BONUS DEBUG
+
+    // 🔐 VERIFY PAYMENT FIRST
+    const crypto = require("crypto");
+
+    const {
+      paymentId,
+      orderId,
+      signature
+    } = req.body;
+
+    if (!paymentId || !orderId || !signature) {
+      return res.status(400).json({ error: "Missing payment data" });
+    }
+
+    const body = orderId + "|" + paymentId;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", "gfq0w6b9ah14HLGs01lXnfuO")
+      .update(body.toString())
+      .digest("hex");
+
+    if (expectedSignature !== signature) {
+      return res.status(400).json({ error: "Payment verification failed" });
+    }
+
+    // ✅ ONLY AFTER VERIFY → SAVE
+    const order = new Order({
+      ...req.body,
+      status: "paid"
+    });
+
+    await order.save();
+
+    res.json({ success: true });
+    // ✅ CREATE PDF
+    const doc = new PDFDocument({
+  size: "A4",
+  margin: 40
+});
+
+doc.addPage = () => {}; // ❌ disable extra pages
+
+    let buffers = [];
+    doc.on("data", buffers.push.bind(buffers));
+
+    // ==================
+    // 🎨 DESIGN
+    // ==================
+
+    const invoiceId = "GN-" + Date.now();
+    const today = new Date().toLocaleDateString();
+
+// SIMPLE CLEAN HEADER (NO BLACK BOX)
+
+// ✅ QR IN HEADER
+//const qrBuffer = await QRCode.toBuffer("https://gonnet.in");
+// doc.image(qrBuffer, 500, 30, { width: 60 });
+
+doc.fillColor("#000")
+  .fontSize(28)
+  .text("GONNET", 50, 40);
+
+doc.fontSize(12)
+  .text("Scan. Call. Connect.", 50, 65);
+
+// RIGHT SIDE
+doc.fontSize(10)
+  .text(`Invoice ID: ${invoiceId}`, 400, 40)
+  .text(`Date: ${today}`, 400, 55);
+
+
+
+
+    // CUSTOMER BOX
+    doc.rect(50, 120, 500, 100).stroke();
+
+    doc.fillColor("#000")
+      .fontSize(12)
+      .text("Customer Details", 60, 130);
+
+    doc.fontSize(10)
+      .text(`${req.body.name}`, 60, 150)
+      .text(`${req.body.email}`, 60, 165)
+      .text( `Address - ${req.body.address}`, 60, 180)
+      .text(`${req.body.city}, ${req.body.state} - ${req.body.pincode}`, 60, 195);
+
+    
+// TABLE START
+const tableTop = 250;
+
+// OUTER BOX
+doc.rect(50, tableTop, 500, 120).stroke();
+
+
+// COLUMN X POSITIONS (fix kar de)
+const colProduct = 60;
+const colQty = 300;
+const colPrice = 380;
+const colTotal = 460;
+
+// HEADER ROW
+const headerY = tableTop + 10;
+
+doc.text("Product", colProduct, headerY);
+doc.text("Qty", colQty, headerY, { width: 50, align: "center" });
+doc.text("Price", colPrice, headerY, { width: 60, align: "right" });
+doc.text("Subtotal", colTotal, headerY, { width: 60, align: "right" });
+
+// LINE
+doc.moveTo(50, tableTop + 30).lineTo(550, tableTop + 30).stroke();
+
+// PRODUCT ROW
+const rowY = tableTop + 45;
+
+// PRODUCT
+doc.text("Gonnet Smart QR Sticker", colProduct, rowY, {
+  width: 200
+});
+
+// QTY
+doc.text(String(req.body.quantity), colQty, rowY, {
+  width: 50,
+  align: "center"
+});
+
+// PRICE
+doc.text("249", colPrice, rowY, {
+  width: 60,
+  align: "right"
+});
+
+// SUBTOTAL
+doc.text(`${249 * req.body.quantity}`, colTotal, rowY, {
+  width: 60,
+  align: "right"
+});
+
+// DELIVERY ROW
+doc.text("Delivery Charges", 60, tableTop + 70)
+// doc.text("—", 300, tableTop + 70)
+doc.text("", 380, tableTop + 70)
+doc.text("50", 460, tableTop + 70, { width: 60, align: "right" });
+
+// LINE
+doc.moveTo(50, tableTop + 95).lineTo(550, tableTop + 95).stroke();
+
+// TOTAL ROW
+const finalTotal = (249 * req.body.quantity) + 50;
+
+doc.fontSize(11)
+  .text("Total", 300, tableTop + 105)
+  .text(`${finalTotal}`, 460, tableTop + 105, { width: 60, align: "right" });
+
+
+    // MESSAGE
+    doc.fillColor("#000")
+      .fontSize(12)
+      doc.text("Thank you for choosing Gonnet", 50, doc.y + 20);
+
+    // FOOTER
+const footerY = 780; // FIXED POSITION (A4 safe)
+
+doc.rect(0, footerY, 600, 60).fill("#111");
+
+doc.fillColor("#fff")
+  .fontSize(10)
+  .text("www.gonnet.in", 50, footerY + 20)
+  .text("hello.gonnet@gmail.com", 200, footerY + 20)
+  .text("Made in India", 400, footerY + 20);
+
+
+    // ==================
+    // ✅ EMAIL AFTER PDF READY (FIXED)
+    // ==================
+
+    doc.on("end", async () => {
+
+  const pdfData = Buffer.concat(buffers);
+
+  // ✅ USER EMAIL
+
+  try {
+    await new Promise(r => setTimeout(r, 500));
+  await transporter.sendMail({
+    from: `Gonnet <${GMAIL_USER}>`,
+    to: req.body.email,
+    subject: "Order Confirmed - Gonnet",
+    html: `
+      <h2>Order Confirmed ✅</h2>
+      <p>Hi ${req.body.name},</p>
+      <p>Your order has been successfully placed.</p>
+      <p><b>Quantity:</b> ${req.body.quantity}</p>
+      <p><b>Total Paid:</b> ₹${req.body.total}</p>
+      <br>
+      <p> Mobile Number you provided:${req.body.mobile}</p>
+      <p>📦 Your sticker will be delivered soon.</p>
+      <p>— Team Gonnet</p>
+    `,
+    attachments: [
+      {
+        filename: "invoice.pdf",
+        content: pdfData
+      }
+    ]
+  });
+
+  console.log("✅ USER EMAIL SENT");
+
+} catch (err) {
+  console.log("❌ USER EMAIL ERROR:", err);
+}
+const printDoc = new PDFDocument({
+  size: [400, 600],
+  margin: 20
+});
+
+let buffers2 = [];
+printDoc.on("data", buffers2.push.bind(buffers2));
+
+// =====================
+// 🎯 CLEAN LAYOUT START
+// =====================
+
+// HEADER
+printDoc.font("Helvetica-Bold")
+  .fontSize(20)
+  .text("GONNET", 20, 30);
+
+printDoc.font("Helvetica")
+  .fontSize(10)
+  .text("Scan. Connect. Stay Secure.", 20, 55);
+
+
+// ---------------------
+// 📍 ADDRESS BLOCK
+// ---------------------
+let startY = 90;
+
+printDoc.font("Helvetica")
+  .fontSize(10)
+  .text("TO,", 20, startY);
+
+printDoc.font("Helvetica-Bold")
+  .fontSize(11)
+  .text(req.body.name, 20, startY + 15);
+
+printDoc.font("Helvetica")
+  .fontSize(10)
+  .text(req.body.address, 20, startY + 35)
+  .text(`${req.body.city}, ${req.body.state} - ${req.body.pincode}`, 20, startY + 50)
+  .text(`Mobile: ${req.body.mobile}`, 20, startY + 70);
+
+
+// ---------------------
+// 💬 MESSAGE BLOCK
+// ---------------------
+let msgY = startY + 120;
+
+printDoc.font("Helvetica-Bold")
+  .fontSize(14)
+  .text("Welcome to Gonnet", 20, msgY);
+
+printDoc.font("Helvetica")
+  .fontSize(10)
+  .text(
+    "Welcome to Gonnet.\nThank you for choosing Gonnet. Your QR sticker is designed to help you stay connected. \n Simply scan and set up your profile. \n  Thank you for choosing Gonnet.\n— Team Gonnet"
+  );
+
+
+// ---------------------
+// 🔳 BOTTOM SECTION
+// ---------------------
+let bottomY = msgY + 90;
+
+// QR BOX (RIGHT SIDE)
+printDoc.rect(250, bottomY, 120, 120).stroke();
+
+printDoc.fontSize(8)
+  .text("Scan here", 280, bottomY + 125);
+
+// HOW TO USE (LEFT SIDE)
+printDoc.font("Helvetica-Bold")
+  .fontSize(10)
+  .text("How to use:", 20, bottomY);
+
+printDoc.font("Helvetica")
+  .fontSize(9)
+  .text(
+`• Peel sticker and Paste it. 
+• Place from the inside of the windshield.
+• Scan QR to create your personal QR code.
+• Save profile`,
+    20,
+    bottomY + 15
+  );
+
+
+// ---------------------
+// 🌐 FOOTER
+// ---------------------
+printDoc.fontSize(8)
+  .fillColor("gray")
+  .text("www.gonnet.in", 20, 570);
+
+
+// =====================
+// 📩 EMAIL SEND
+// =====================
+
+printDoc.on("end", async () => {
+
+  const pdfData2 = Buffer.concat(buffers2);
+
+  try {
+    await transporter.sendMail({
+      from: `Gonnet <${GMAIL_USER}>`,
+      to: GMAIL_USER,
+      subject: "Gonnet - Printing",
+      html: `<p>New order ready for printing</p>`,
+      attachments: [
+        {
+          filename: "gonnet-print.pdf",
+          content: pdfData2
+        }
+      ]
+    });
+
+    console.log("✅ ADMIN EMAIL SENT");
+
+  } catch (err) {
+    console.log("❌ ADMIN EMAIL ERROR:", err);
+  }
+});
+
+printDoc.end();
+});
+
+    // ✅ END PDF LAST
+    doc.end();
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Save failed" });
+  }
+  
+});
+
+app.post("/api/admin/orders", async (req, res) => {
+  try {
+    const { startDate, endDate } = req.body;
+
+    let filter = {};
+
+    if (startDate && endDate) {
+      filter.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate)
+      };
+    }
+
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+
+    res.json({ orders });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
 
 app.get("/dashboard",(req,res)=>{
 res.sendFile(path.join(__dirname,"public","dashboard.html"));
@@ -818,5 +1235,10 @@ await Customer.create({
     res.status(500).send("Bulk generation failed");
   }
 });
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+
 
 app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

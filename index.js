@@ -403,6 +403,10 @@ doc.fillColor("#fff")
 } catch (err) {
   console.log("❌ USER EMAIL ERROR:", err);
 }
+// =====================
+// 🖨️ ADMIN PRINT PDF (FIXED LAYOUT)
+// =====================
+
 const printDoc = new PDFDocument({
   size: [400, 600],
   margin: 20
@@ -411,11 +415,9 @@ const printDoc = new PDFDocument({
 let buffers2 = [];
 printDoc.on("data", buffers2.push.bind(buffers2));
 
-// =====================
-// 🎯 CLEAN LAYOUT START
-// =====================
-
-// HEADER
+// ---------------------
+// 🔷 HEADER
+// ---------------------
 printDoc.font("Helvetica-Bold")
   .fontSize(20)
   .text("GONNET", 20, 30);
@@ -446,7 +448,7 @@ printDoc.font("Helvetica")
 
 
 // ---------------------
-// 💬 MESSAGE BLOCK
+// 💬 MESSAGE BLOCK (IMPROVED CONTENT)
 // ---------------------
 let msgY = startY + 120;
 
@@ -457,22 +459,29 @@ printDoc.font("Helvetica-Bold")
 printDoc.font("Helvetica")
   .fontSize(10)
   .text(
-    "Welcome to Gonnet.\nThank you for choosing Gonnet. Your QR sticker is designed to help you stay connected. \nSimply scan and set up your profile. \nThank you for choosing Gonnet.\n   — Team Gonnet"
+`Your Gonnet QR sticker helps you stay connected instantly.
+
+•  Create your digital profile in seconds
+•  Get a personal dashboard with your email
+•  Add multiple vehicles under one account
+•  Access anytime via OTP login (no password)
+
+Thank you for choosing Gonnet.
+— Team Gonnet`,
+    20,
+    msgY + 20,
+    { width: 360 }
   );
 
 
 // ---------------------
-// 🔳 BOTTOM SECTION
+// 📌 FIXED BOTTOM SECTION (KEY FIX)
 // ---------------------
-let bottomY = msgY + 90;
 
-// QR BOX (RIGHT SIDE)
-printDoc.rect(250, bottomY, 120, 120).stroke();
+const pageHeight = 600;
+let bottomY = pageHeight - 180;
 
-printDoc.fontSize(8)
-  .text("Scan here", 280, bottomY + 125);
-
-// HOW TO USE (LEFT SIDE)
+// LEFT → HOW TO USE
 printDoc.font("Helvetica-Bold")
   .fontSize(10)
   .text("How to use:", 20, bottomY);
@@ -480,21 +489,27 @@ printDoc.font("Helvetica-Bold")
 printDoc.font("Helvetica")
   .fontSize(9)
   .text(
-`• Peel sticker and Paste it. 
-• Place from the inside of the windshield.
-• Scan QR to create your personal QR code.
-• Save profile`,
+`• Peel and paste sticker
+• Place inside windshield
+• Scan QR to create profile
+• Save and manage via dashboard`,
     20,
-    bottomY + 15
+    bottomY + 15,
+    { width: 180 }
   );
 
 
+// RIGHT → QR BOX
+printDoc.rect(250, bottomY, 120, 120).stroke();
+
+
+
 // ---------------------
-// 🌐 FOOTER
+// 🌐 FOOTER (FIXED)
 // ---------------------
 printDoc.fontSize(8)
   .fillColor("gray")
-  .text("www.gonnet.in", 20, 570);
+  .text("www.gonnet.in", 20, 560);
 
 
 // =====================
@@ -1241,6 +1256,118 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+//app.get("/test-pdf", async (req, res) => {
 
+  const dummy = {
+    name: "Parth Bhardwaj",
+    address: "164/9 Sample Street",
+    city: "Gurgaon",
+    state: "Haryana",
+    pincode: "122001",
+    mobile: "9876543210"
+  };
+
+  const PDFDocument = require("pdfkit");
+
+  const doc = new PDFDocument({
+    size: [400, 600],
+    margin: 20
+  });
+
+  res.setHeader("Content-Type", "application/pdf");
+  doc.pipe(res);
+
+  // ---------------------
+  // 🔷 HEADER
+  // ---------------------
+  doc.font("Helvetica-Bold")
+    .fontSize(20)
+    .text("GONNET", 20, 30);
+
+  doc.font("Helvetica")
+    .fontSize(10)
+    .text("Scan. Connect. Stay Secure.", 20, 55);
+
+  // ---------------------
+  // 📍 ADDRESS BLOCK
+  // ---------------------
+  let startY = 90;
+
+  doc.font("Helvetica")
+    .fontSize(10)
+    .text("TO,", 20, startY);
+
+  doc.font("Helvetica-Bold")
+    .fontSize(11)
+    .text(dummy.name, 20, startY + 15);
+
+  doc.font("Helvetica")
+    .fontSize(10)
+    .text(dummy.address, 20, startY + 35)
+    .text(`${dummy.city}, ${dummy.state} - ${dummy.pincode}`, 20, startY + 50)
+    .text(`Mobile: ${dummy.mobile}`, 20, startY + 70);
+
+  // ---------------------
+  // 💬 MESSAGE
+  // ---------------------
+  let msgY = startY + 120;
+
+  doc.font("Helvetica-Bold")
+    .fontSize(14)
+    .text("Welcome to Gonnet", 20, msgY);
+
+  doc.font("Helvetica")
+    .fontSize(10)
+    .text(
+`Your Gonnet QR sticker helps you stay connected instantly.
+
+•  Create your digital profile in seconds
+•  Get a personal dashboard with your email
+•  Add multiple vehicles under one account
+•  Access anytime via OTP login (no password)
+
+Thank you for choosing Gonnet.
+— Team Gonnet`,
+      20,
+      msgY + 20,
+      { width: 360 }
+    );
+
+  // ---------------------
+  // 📌 FIXED BOTTOM
+  // ---------------------
+  const pageHeight = 600;
+  let bottomY = pageHeight - 180;
+
+  doc.font("Helvetica-Bold")
+    .fontSize(10)
+    .text("How to use:", 20, bottomY);
+
+  doc.font("Helvetica")
+    .fontSize(9)
+    .text(
+`• Peel and paste sticker
+• Place inside windshield
+• Scan QR to create profile
+• Save and manage via dashboard`,
+      20,
+      bottomY + 15,
+      { width: 180 }
+    );
+
+  // QR box
+  doc.rect(250, bottomY, 120, 120).stroke();
+
+
+
+  // ---------------------
+  // 🌐 FOOTER
+  // ---------------------
+  doc.fontSize(8)
+    .fillColor("gray")
+    .text("www.gonnet.in", 20, 560);
+
+  doc.end();
+// });
 
 app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

@@ -1213,8 +1213,8 @@ await Customer.create({
       stickers.push(`
         <div class="sticker">
           <iframe src="${BASE_URL}/profile/${uniqueId}/qr"
-                  width="345"
-                  height="180"
+                  width="380"
+                  height="230"
                   style="border:none;">
           </iframe>
         </div>
@@ -1236,8 +1236,8 @@ await Customer.create({
             flex-wrap: wrap;
           }
           .sticker {
-            width: 345px;
-            height: 180px;
+            width: 380px;
+            height: 230px;
           }
         </style>
       </head>

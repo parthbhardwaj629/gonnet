@@ -22,8 +22,8 @@ body {
 
 /* ===== CARD ===== */
 .qr-card {
-  width: 345px;
-  height: 208px;
+  width: 380px;
+  height: 230px;
   border-radius: 0px;
   display: flex;
   flex-direction: column;
@@ -62,7 +62,8 @@ body {
 /* LEFT */
 .qwerty {
   color: #fff;
-  font-weight: 800;
+  font-weight: 900;
+  font-family: Arial Black, Arial, sans-serif;
   font-size: 18pt;
   letter-spacing: 1.5px;
 }
@@ -72,6 +73,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow: hidden;
 }
 
 .meta {
@@ -88,7 +90,7 @@ body {
 .headline {
   margin-top: 4mm;
   font-size: 10pt;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: underline;
 }
 
@@ -104,7 +106,8 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3mm;
+
+  padding: 3mm 4mm 3mm 8mm; /* 🔥 LEFT padding zyada */
 }
 
 /* QR BOX */
@@ -112,16 +115,18 @@ body {
   background: #fff;
   border-radius: 4mm;
   padding: 2mm; /* 🔥 reduced */
+  margin-left: 3mm;
 }
 
 .qr-white img {
-  width: 26mm; /* 🔥 bigger QR */
-  height: 26mm;
+  width: 24mm;
+  height: 24mm;
 }
 
 .qr-tagline {
   margin-top: 5px;
-  font-size: 6pt;
+  font-size: 5.5pt;
+  line-height: 1.2;
   color: #fff;
   text-align: center;
 }

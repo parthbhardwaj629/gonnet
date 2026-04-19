@@ -116,10 +116,10 @@ class="btn btn-sm btn-outline-primary w-100">
 View
 </a>
 
-<button onclick="downloadQR('${v.uniqueId}')"
+<!-- <button onclick="downloadQR('${v.uniqueId}')"
 class="btn btn-sm btn-outline-success w-100">
 Download QR
-</button>
+</button> -->
 
 <a href="/profile/${v.uniqueId}/input?fromOtp=true"
 class="btn btn-sm btn-outline-dark w-100">
@@ -167,9 +167,9 @@ Delete
 }
 
 
-function downloadQR(id){
-  window.open(`/profile/${id}/qr`, '_blank');
-}
+//function downloadQR(id){
+//  window.open(`/profile/${id}/qr`, '_blank');
+// }
 
 
 async function deleteVehicle(id){

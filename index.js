@@ -37,7 +37,14 @@ const GMAIL_USER = "hello.gonnet@gmail.com";
 const GMAIL_PASS = "hymteiykjuvouedk";
 const MONGO_URL =
   "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
-const BASE_URL = process.env.BASE_URL || "http://localhost:3000";
+const BASE_URL =
+  process.env.BASE_URL ||
+  (process.env.NODE_ENV === "production"
+    ? "https://gonnet.in"
+    : "http://localhost:3000");
+
+    console.log("👉 BASE_URL =", BASE_URL);
+console.log("👉 NODE_ENV =", process.env.NODE_ENV);
 
 // ----- Twilio WhatsApp (Sandbox) -----
 const twilio = require("twilio");
@@ -763,6 +770,16 @@ app.get("/profile/:uniqueId/view", (req, res) => {
 });
 
 app.get("/profile/:uniqueId/qr", (req, res) => {
+
+  const ua = req.headers['user-agent'] || "";
+
+  // ✅ Allow puppeteer (HeadlessChrome)
+  const isInternal = ua.includes("Headless");
+
+  if (!isInternal) {
+    return res.status(403).send("Access Denied");
+  }
+
   res.sendFile(path.join(__dirname, "public", "qr-card.html"));
 });
 
@@ -1255,6 +1272,7 @@ await Customer.create({
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
+
 
 
 app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

@@ -36,7 +36,7 @@ const PORT = process.env.PORT || 3000;
 const GMAIL_USER = "hello.gonnet@gmail.com";
 const GMAIL_PASS = "hymteiykjuvouedk";
 const MONGO_URL =
-  "mongodb+srv://parthbhardwaj629_db_user:qwerty1234567890@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
+  "mongodb+srv://parthbhardwaj629_db_user:Test%401234@gonnetdb.t3067xh.mongodb.net/GonnetDB?retryWrites=true&w=majority&appName=GonnetDB";
 const BASE_URL =
   process.env.BASE_URL ||
   (process.env.NODE_ENV === "production"
@@ -146,6 +146,12 @@ const customerSchema = new mongoose.Schema({
   isRegistered: { type: Boolean, default: false },
   otp: String,
   otpExpiry: Date,
+  stickerConfig: {
+  heading: String,
+  subheading: String,
+  note: String,
+  poweredBy: String
+}
 });
 customerSchema.index({ uniqueId: 1 });
 customerSchema.index({ email: 1 });
@@ -774,7 +780,9 @@ app.get("/profile/:uniqueId/qr", (req, res) => {
   const ua = req.headers['user-agent'] || "";
 
   // ✅ Allow puppeteer (HeadlessChrome)
-  const isInternal = ua.includes("Headless");
+  const isInternal =
+  ua.includes("Headless") ||
+  req.headers["x-internal-request"] === "true";
 
   if (!isInternal) {
     return res.status(403).send("Access Denied");
@@ -1207,7 +1215,14 @@ await Customer.create({
   uniqueId,
   brandName: brand,
   isRegistered: false,
-  isActive: true
+  isActive: true,
+
+  stickerConfig: {
+    heading: req.query.heading || "GONNET",
+    subheading: req.query.subheading || "Scan to know more. Connect instantly",
+    note: req.query.note || "Scan using phone camera or QR scanner",
+    poweredBy: req.query.poweredBy || ""
+  }
 });
 
       stickers.push(`
@@ -1269,10 +1284,126 @@ await Customer.create({
     res.status(500).send("Bulk generation failed");
   }
 });
+
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+// 🔥 CUSTOM BULK QR (ADMIN FLEXIBLE)
+app.post("/internal/custom-bulk", upload.single("logo"), async (req, res) => {
+  try {
+    const ADMIN_KEY = process.env.ADMIN_KEY || "parth_bulk_2026";
 
+    if (req.query.key !== ADMIN_KEY) {
+      return res.status(403).send("Unauthorized");
+    }
+
+    const heading = req.body.heading || "GONNET";
+const subheading = req.body.subheading || "";
+const note = req.body.note || "";
+const poweredBy = req.body.poweredBy || "";
+const rightsLine = req.body.rightsLine || "";
+const count = parseInt(req.body.count) || 10;
+
+let logoPath = "";
+
+if (req.file) {
+  logoPath = BASE_URL + "/" + req.file.path;
+}
+
+    const browser = await puppeteer.launch({
+  headless: "new",
+  args: ["--no-sandbox", "--disable-setuid-sandbox"]
+});
+    const page = await browser.newPage();
+
+    const stickers = [];
+
+    for (let i = 0; i < count; i++) {
+
+      const uniqueId = uuidv4();
+
+      await Customer.create({
+        uniqueId,
+        brandName: "Custom",
+        isRegistered: false,
+        isActive: true,
+
+        stickerConfig: {
+          heading,
+          subheading,
+          note,
+          poweredBy,
+          logo: logoPath,
+          rightsLine
+        }
+      });
+
+      stickers.push(`
+        <div class="sticker">
+          <iframe src="${BASE_URL}/profile/${uniqueId}/qr"
+                  width="380"
+                  height="230"
+                  style="border:none;">
+          </iframe>
+        </div>
+      `);
+    }
+
+    const html = `
+      <html>
+      <head>
+        <style>
+          body { margin: 0; padding: 0; }
+          .a3 {
+            width: 1190px;
+            height: 842px;
+            display: flex;
+            flex-wrap: wrap;
+          }
+          .sticker {
+            width: 380px;
+            height: 230px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="a3">
+          ${stickers.join("")}
+        </div>
+      </body>
+      </html>
+    `;
+
+    await page.setExtraHTTPHeaders({
+  "x-internal-request": "true"
+});
+
+await page.setContent(html);
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    
+
+    const pdf = await page.pdf({
+      width: "1190px",
+      height: "842px",
+      printBackground: true
+    });
+
+    await browser.close();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=custom-bulk-${count}.pdf`
+    );
+
+    res.send(pdf);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Custom bulk failed");
+  }
+});
 
 app.listen(PORT, () => console.log(`🚀 Running on port ${PORT}`));

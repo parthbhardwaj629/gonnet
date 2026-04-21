@@ -165,27 +165,19 @@ body {
 
     <!-- LEFT -->
     <div class="left">
-      <div class="qwerty">GONNET</div>
+      <div class="qwerty" id="headingText">GONNET</div>
 
-     <div class="meta" id="brandBlock">
-        Gonnet. All Rights Reserved.<br> </div>
-     <!--    <span class="powered">Powered by Ganga Motors
-          <br><span style="color: #ffffff;">Gurgaon’s 1st Maruti Authorized Service Station</span>
-          </span>
-      </div> -->
+     <div class="meta" id="brandBlock"></div>
 
-      <div class="headline">
-        Scan to know more.<br>
-        Connect instantly
-      </div>
+      <div class="headline" id="subheadingText"></div>
 
-      <div class="note">
-        Scan using phone camera or QR scanner
-      </div>
+      <div class="note" id="noteText"></div>
     </div>
 
     <!-- RIGHT -->
     <div class="right">
+
+      <div id="logoContainer" style="margin-bottom:5px;"></div>
       <div class="qr-white" id="qrBox">Loading…</div>
 
       <div class="qr-tagline">
@@ -215,19 +207,40 @@ async function loadQR() {
   const profileRes = await fetch(`/api/profile/${uniqueId}`);
   const profile = await profileRes.json();
 
-  const brand = profile.brandName || "Gonnet";
 
-  if (brand !== "Gonnet") {
-    document.getElementById("brandBlock").innerHTML = `
-      Gonnet. All Rights Reserved.<br>
-      <span class="powered">Powered by ${brand}</span>
-    `;
-  } else {
-    document.getElementById("brandBlock").innerHTML = `
-      Gonnet. All Rights Reserved.<br>
-      <span class="powered">Powered by Ganga Motors</span>
-    `;
-  }
+// 🔥 APPLY STICKER CONFIG
+const config = profile.stickerConfig || {};
+
+// ✅ LOGO (CORRECT PLACE)
+if (config.logo && config.logo.trim() !== "") {
+  document.getElementById("logoContainer").innerHTML = `
+    <img src="${config.logo}" style="max-width:40px; max-height:40px;">
+  `;
+}
+
+// 🔥 BRAND LINE (FINAL FIX)
+let brandHTML = "";
+
+// ✅ RIGHTS LINE FIRST
+if (config.rightsLine && config.rightsLine.trim() !== "") {
+  brandHTML += `${config.rightsLine}<br>`;
+}
+
+// ✅ POWERED BY BELOW
+if (config.poweredBy && config.poweredBy.trim() !== "") {
+  brandHTML += `<span class="powered">${config.poweredBy}</span>`;
+}
+
+document.getElementById("brandBlock").innerHTML = brandHTML;
+
+document.getElementById("headingText").innerText =
+  config.heading || "GONNET";
+
+document.getElementById("subheadingText").innerHTML =
+  (config.subheading || "Scan to know more.<br>Connect instantly").replace(/\n/g, "<br>");
+
+document.getElementById("noteText").innerText =
+  config.note || "Scan using phone camera or QR scanner";
 
 }
 loadQR();

@@ -150,7 +150,8 @@ const customerSchema = new mongoose.Schema({
   heading: String,
   subheading: String,
   note: String,
-  poweredBy: String
+  poweredBy: String,
+  rightsLine: String
 }
 });
 customerSchema.index({ uniqueId: 1 });

@@ -213,6 +213,9 @@ async function generateCustomBulk(btn){
 
   const formData = new FormData();
 
+  const rightsLine = document.getElementById("rightsLine").value || "";
+  formData.append("rightsLine", rightsLine);
+
   formData.append("heading", document.getElementById("heading").value || "GONNET");
   formData.append("subheading", document.getElementById("subheading").value || "");
   formData.append("note", document.getElementById("note").value || "");

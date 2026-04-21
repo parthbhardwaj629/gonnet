@@ -221,12 +221,12 @@ if (config.logo && config.logo.trim() !== "") {
 // 🔥 BRAND LINE (FINAL FIX)
 let brandHTML = "";
 
-// ✅ RIGHTS LINE FIRST
 if (config.rightsLine && config.rightsLine.trim() !== "") {
-  brandHTML += `${config.rightsLine}<br>`;
+  brandHTML += config.rightsLine + "<br>";
+} else {
+  brandHTML += "Gonnet. All Rights Reserved.<br>";
 }
 
-// ✅ POWERED BY BELOW
 if (config.poweredBy && config.poweredBy.trim() !== "") {
   brandHTML += `<span class="powered">${config.poweredBy}</span>`;
 }

@@ -62,6 +62,100 @@
     <tbody id="ordersTable"></tbody>
   </table>
 
+<!-- ================= REGISTERED USERS ================= -->
+
+<div class="mt-5">
+  <h2>👥 Registered Users</h2>
+
+  <div class="mt-3 mb-3">
+   <div class="row mt-3 mb-4">
+
+  <div class="col-md-3">
+    <div class="border rounded p-3 bg-light">
+      <h6>Total Profiles</h6>
+      <h3 id="totalProfiles">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="border rounded p-3 bg-light">
+      <h6>Registered Users</h6>
+      <h3 id="totalUsers">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="border rounded p-3 bg-light">
+      <h6>Unregistered</h6>
+      <h3 id="totalUnregistered">0</h3>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="border rounded p-3 bg-light">
+      <h6>Inactive Profiles</h6>
+      <h3 id="totalInactive">0</h3>
+    </div>
+  </div>
+
+</div>
+    <div class="row mt-3 mb-3">
+
+  <div class="col-md-6">
+    <input
+      type="text"
+      id="searchInput"
+      class="form-control"
+      placeholder="Search name, mobile, vehicle, email..."
+      onkeyup="fetchUsers(1)"
+    >
+  </div>
+
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+
+  <button
+    class="btn btn-dark"
+    onclick="fetchUsers(currentPage - 1)"
+  >
+    Previous
+  </button>
+
+  <div id="pageInfo">
+    Page 1
+  </div>
+
+  <button
+    class="btn btn-dark"
+    onclick="fetchUsers(currentPage + 1)"
+  >
+    Next
+  </button>
+
+</div>
+  </div>
+
+
+  <table class="table table-bordered table-striped">
+
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Mobile</th>
+        <th>Vehicle</th>
+        <th>Email</th>
+        <th>Scans</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="usersTable"></tbody>
+
+  </table>
+</div>
+
   <!-- DEFAULT BULK -->
   <div class="mt-4 p-4 border rounded bg-white">
     <h4>⚙️ Default Bulk Sticker</h4>
@@ -139,6 +233,7 @@ function loginAdmin() {
 }
 
 // ================= LOAD =================
+let currentPage = 1;
 window.onload = () => {
 
   if (localStorage.getItem("adminAuth") === "true") {
@@ -151,6 +246,7 @@ window.onload = () => {
   document.getElementById("endDate").value = today;
 
   fetchOrders();
+  fetchUsers();
 };
 
 // ================= ORDERS =================
@@ -236,6 +332,175 @@ async function generateCustomBulk(btn){
 
   btn.innerText = "Generate PDF";
   btn.disabled = false;
+}
+
+async function fetchUsers(page = 1) {
+
+  try {
+
+    currentPage = page;
+
+    const search = document
+      .getElementById("searchInput")
+      ?.value || "";
+
+    const res = await fetch(
+      `/api/admin/users?page=${page}&search=${encodeURIComponent(search)}`
+    );
+
+    const data = await res.json();
+
+    const users = data.users;
+
+    let html = "";
+
+    users.forEach((u, index) => {
+
+      html += `
+        <tr>
+          <td>${((page - 1) * 50) + index + 1}</td>
+          <td>${u.name || "-"}</td>
+          <td>${u.mobile || "-"}</td>
+          <td>${u.carNumber || "-"}</td>
+          <td>${u.email || "-"}</td>
+          <td>${u.scanCount || 0}</td>
+          <td>${u.isActive ? "✅ Active" : "❌ Inactive"}</td>
+        </tr>
+      `;
+
+    });
+
+    document.getElementById("usersTable").innerHTML = html;
+
+    document.getElementById("totalUsers").innerText =
+  data.totalRegistered;
+
+document.getElementById("totalProfiles").innerText =
+  data.totalProfiles;
+
+document.getElementById("totalUnregistered").innerText =
+  data.totalUnregistered;
+
+document.getElementById("totalInactive").innerText =
+  data.totalInactive;
+
+    document.getElementById("pageInfo").innerText =
+      `Page ${data.currentPage} of ${data.totalPages}`;
+
+  } catch (err) {
+
+    console.log(err);
+
+  }
+
+}
+
+  const search = document
+    .getElementById("searchInput")
+    .value
+    .toLowerCase();
+
+  const filterType =
+    document.getElementById("filterType").value;
+
+  const users = window.allUsers || [];
+
+  let html = "";
+
+  const filtered = users.filter(u => {
+
+    if (filterType === "name") {
+      return (u.name || "")
+        .toLowerCase()
+        .includes(search);
+    }
+
+    if (filterType === "mobile") {
+      return (u.mobile || "")
+        .toLowerCase()
+        .includes(search);
+    }
+
+    if (filterType === "vehicle") {
+      return (u.carNumber || "")
+        .toLowerCase()
+        .includes(search);
+    }
+
+    if (filterType === "email") {
+      return (u.email || "")
+        .toLowerCase()
+        .includes(search);
+    }
+
+    return true;
+
+  });
+
+  filtered.forEach((u, index) => {
+
+    html += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${u.name || "-"}</td>
+        <td>${u.mobile || "-"}</td>
+        <td>${u.carNumber || "-"}</td>
+        <td>${u.email || "-"}</td>
+        <td>${u.scanCount || 0}</td>
+        <td>${u.isActive ? "✅ Active" : "❌ Inactive"}</td>
+      </tr>
+    `;
+
+  });
+
+  document.getElementById("usersTable").innerHTML = html;
+
+function filterUsers() {
+
+  const search = document
+    .getElementById("searchInput")
+    .value
+    .toLowerCase()
+    .trim();
+
+  const users = window.allUsers || [];
+
+  let html = "";
+
+  const filtered = users.filter(u => {
+
+    const name = (u.name || "").toLowerCase();
+    const mobile = (u.mobile || "").toLowerCase();
+    const vehicle = (u.carNumber || "").toLowerCase();
+    const email = (u.email || "").toLowerCase();
+
+    return (
+      name.includes(search) ||
+      mobile.includes(search) ||
+      vehicle.includes(search) ||
+      email.includes(search)
+    );
+
+  });
+
+  filtered.forEach((u, index) => {
+
+    html += `
+      <tr>
+        <td>${index + 1}</td>
+        <td>${u.name || "-"}</td>
+        <td>${u.mobile || "-"}</td>
+        <td>${u.carNumber || "-"}</td>
+        <td>${u.email || "-"}</td>
+        <td>${u.scanCount || 0}</td>
+        <td>${u.isActive ? "✅ Active" : "❌ Inactive"}</td>
+      </tr>
+    `;
+
+  });
+
+  document.getElementById("usersTable").innerHTML = html;
+
 }
 
 </script>

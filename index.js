@@ -568,6 +568,82 @@ printDoc.end();
   
 });
 
+app.get("/api/admin/users", async (req, res) => {
+
+  try {
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 50;
+
+    const skip = (page - 1) * limit;
+
+    const search = (req.query.search || "").trim();
+
+    let filter = {
+      isRegistered: true
+    };
+
+    if (search !== "") {
+
+      filter.$or = [
+
+        { name: { $regex: search, $options: "i" } },
+
+        { mobile: { $regex: search, $options: "i" } },
+
+        { carNumber: { $regex: search, $options: "i" } },
+
+        { email: { $regex: search, $options: "i" } }
+
+      ];
+
+    }
+
+    const users = await Customer.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalUsers = await Customer.countDocuments(filter);
+
+    const totalProfiles = await Customer.countDocuments({});
+
+const totalRegistered = await Customer.countDocuments({
+  isRegistered: true
+});
+
+const totalUnregistered = await Customer.countDocuments({
+  isRegistered: false
+});
+
+const totalInactive = await Customer.countDocuments({
+  isActive: false
+});
+
+    res.json({
+  users,
+  totalUsers,
+  totalProfiles,
+  totalRegistered,
+  totalUnregistered,
+  totalInactive,
+  currentPage: page,
+  totalPages: Math.ceil(totalUsers / limit)
+});
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      error: "Failed to fetch users"
+    });
+
+  }
+
+});
+
 app.post("/api/admin/orders", async (req, res) => {
   try {
     const { startDate, endDate } = req.body;

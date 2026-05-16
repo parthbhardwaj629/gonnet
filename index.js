@@ -1,7 +1,6 @@
 // index.js - FINAL ✅ with WhatsApp (Twilio Sandbox) added
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const path = require("path");
 const { v4: uuidv4 } = require("uuid");
 const nodemailer = require("nodemailer");
@@ -98,7 +97,7 @@ function normalizeMobile(mobile) {
 }
 // -------------------------------------------------------
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -180,13 +179,21 @@ app.get("/order", (req, res) => {
 });
 
 app.post("/api/create-order", async (req, res) => {
- //  console.log("🔥 CREATE ORDER HIT");
+
+  console.log("BODY =", req.body);
 
   try {
+
     const { total } = req.body;
 
+    if (!total || isNaN(total)) {
+      return res.status(400).json({
+        error: "Invalid total"
+      });
+    }
+
     const options = {
-      amount: total * 100,
+      amount: Number(total) * 100,
       currency: "INR",
       receipt: "order_" + Date.now()
     };
@@ -196,8 +203,12 @@ app.post("/api/create-order", async (req, res) => {
     res.json(order);
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Order creation failed" });
+
+    console.error("CREATE ORDER ERROR =", err);
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 });
 
@@ -1014,21 +1025,58 @@ if (
             to: body.email,
             subject: "Registration Successful - Gonnet",
             html: `
-              <div style="font-family:Segoe UI,Arial;">
-                <h2>Welcome to Gonnet</h2>
-                <p>Dear ${body.name || "User"}, your profile is live.</p>
-                <h4>Your Submitted Details</h4>
-                <ul>
-                  <li><b>Name:</b> ${body.name || "-"}</li>
-                  <li><b>Mobile:</b> ${body.mobile || "-"}</li>
-                  <li><b>Email:</b> ${body.email || "-"}</li>
-                  <li><b>Car Number:</b> ${body.carNumber || "-"}</li>
-                  <li><b>Emergency:</b> ${body.emergencyName || "-"} (${body.emergencyRelation || "-"}) - ${body.emergencyNumber || "-"}</li>
-                  <li><b>Bio:</b> ${body.bio || "-"}</li>
-                </ul>
-                <p><a href="${profileUrl}">👉 View Your Profile</a></p>
-                <p style="font-size:12px;color:#777;">© Gonnet</p>
-              </div>`,
+  <div style="font-family:Segoe UI,Arial;line-height:1.6;color:#222;">
+    
+    <h2>Welcome to Gonnet</h2>
+
+    <p>Dear ${body.name || "User"},</p>
+
+    <p>
+      Your Gonnet profile has been successfully created and is now live.
+    </p>
+
+    <h3>Your Submitted Details</h3>
+
+    <ul>
+      <li><b>Name:</b> ${body.name || "-"}</li>
+      <li><b>Mobile:</b> ${body.mobile || "-"}</li>
+      <li><b>Email:</b> ${body.email || "-"}</li>
+      <li><b>Vehicle Number:</b> ${body.carNumber || "-"}</li>
+      <li><b>Emergency Contact:</b> ${body.emergencyName || "-"} (${body.emergencyRelation || "-"}) - ${body.emergencyNumber || "-"}</li>
+    </ul>
+
+    <p>
+      <a href="${profileUrl}">
+        View Your Gonnet Profile
+      </a>
+    </p>
+
+    <hr>
+
+    <p>
+      By registering on Gonnet, you acknowledge and confirm that you have voluntarily reviewed, understood, and consented to Gonnet’s Privacy Policy, Terms of Usage, data processing practices, QR-linked profile visibility settings, and associated platform policies.
+    </p>
+
+    <p>
+      Your information may be processed, stored, displayed, or managed in accordance with the applicable Gonnet Privacy Policy and applicable laws including the Digital Personal Data Protection Act, 2023.
+    </p>
+
+    <p>
+      Privacy Policy:
+      <br>
+      <a href="${BASE_URL}/privacy">
+        ${BASE_URL}/privacy
+      </a>
+    </p>
+
+    <br>
+
+    <p>
+      — Team Gonnet
+    </p>
+
+  </div>
+`,
           });
         }
 

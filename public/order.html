@@ -186,26 +186,22 @@ async function placeOrder(){
 
 
 
+try {
 
   const res = await fetch("/api/create-order", {
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body: JSON.stringify({ total })
-});
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ total })
+  });
 
-// ❗ ADD THIS CHECK
-if(!res.ok){
-  alert("Something went wrong. Please try again.");
-  return;
-}
+  const order = await res.json();
 
-const order = await res.json();
+  console.log("ORDER =", order);
 
-// ❗ SAFETY CHECK
-if(!order || !order.id){
-  alert("Payment initialization failed.");
-  return;
-}
+  if(!order.id){
+    alert("Order creation failed");
+    return;
+  }
 
   const options = {
     key: window.RAZORPAY_KEY_ID,
@@ -218,51 +214,64 @@ if(!order || !order.id){
     handler: async function (response){
 
       document.body.innerHTML = `
-        <div style="text-align:center; padding:60px;">
-          <h2>⏳ Processing your order...</h2>
+        <div style="text-align:center;padding:60px;">
+          <h2>Processing order...</h2>
         </div>
       `;
 
       const saveRes = await fetch("/api/save-order", {
-  method:"POST",
-  headers:{ "Content-Type":"application/json" },
-  body: JSON.stringify({
-    name, email, mobile, address, city, state, pincode,
-    quantity, total,
-    paymentId: response.razorpay_payment_id,
-    orderId: response.razorpay_order_id,
-    signature: response.razorpay_signature
-  })
-});
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          mobile,
+          address,
+          city,
+          state,
+          pincode,
+          quantity,
+          total,
+          paymentId: response.razorpay_payment_id,
+          orderId: response.razorpay_order_id,
+          signature: response.razorpay_signature
+        })
+      });
 
-const saveData = await saveRes.json();
+      const saveData = await saveRes.json();
 
-if(!saveData.success){
-  alert("⚠️ Payment done but saving failed. Contact support.");
-  return;
-}
+      if(saveData.success){
+        alert("Payment Successful");
+        window.location.href="/";
+      } else {
+        alert("Payment done but save failed");
+      }
+    },
 
-      document.body.innerHTML = `
-        <div style="text-align:center; padding:60px;">
-          <h1 style="color:green;">✅ Order Confirmed</h1>
-          <p>Invoice sent to your email</p>
-          <button onclick="window.location.href='/'"
-            style="padding:12px 25px; background:#FFB300; border:none;">
-            Go Home
-          </button>
-        </div>
-      `;
+    theme: {
+      color: "#FFB300"
     }
   };
 
-  const rzp = new Razorpay(options);
+  const rzp1 = new Razorpay(options);
 
-  rzp.on('payment.failed', function (response){
-  alert("❌ Payment failed. Try again.");
-  console.log(response.error);
-});
+  rzp1.on("payment.failed", function (response) {
+    console.log(response.error);
+    alert("Payment Failed");
+  });
 
-  rzp.open();
+  setTimeout(() => {
+  rzp1.open();
+}, 500);
+
+} catch(err){
+
+  console.log(err);
+  alert("Checkout opening failed");
+
+}
+
+
 }
 
 function updateTotal(){

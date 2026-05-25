@@ -9,6 +9,7 @@ const QRCode = require("qrcode");
 const Order = require("./models/Order");
 const Razorpay = require("razorpay");
 const PDFDocument = require("pdfkit");
+const deleteRoutes = require("./delete");
 
 require("dotenv").config();
 
@@ -22,10 +23,6 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
-//const razorpay = new Razorpay({
-//  key_id: "rzp_test_SdLiHDdbY4X8uR",
-//  key_secret: "pjSPHrKGNXLT70peaeDSOYUH"
-//});
 
 
 
@@ -135,6 +132,17 @@ const customerSchema = new mongoose.Schema({
   photo: String,
   brandName: String,
   isActive: { type: Boolean, default: true },
+  isDeleted: {
+  type: Boolean,
+  default: false
+},
+deletionRequestedAt: Date,
+permanentlyDeleted: {
+  type:Boolean,
+  default:false
+},
+
+permanentDeletionAt: Date,
   scanCount: { type: Number, default: 0 },
     lastScanAt: Date,
     lastScanIP: String,
@@ -164,6 +172,8 @@ customerSchema.index({ mobile: 1 });
 const Customer = mongoose.model("Customer", customerSchema);
 
 
+
+
 // Nodemailer transporter (POOLED)
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -173,6 +183,15 @@ const transporter = nodemailer.createTransport({
   auth: { user: GMAIL_USER, pass: GMAIL_PASS }
 });
 // ---------- ROUTES ----------
+
+app.use(
+  "/api",
+  deleteRoutes(
+    Customer,
+    transporter,
+    GMAIL_USER
+  )
+);
 
 // Home
 app.get("/", (req, res) =>
@@ -1215,7 +1234,11 @@ app.post("/api/login/send-otp", async (req,res)=>{
       return res.status(400).json({error:"Email required"});
     }
 
-    const customers=await Customer.find({email}).lean();
+    const customers = await Customer.find({
+  email,
+  isDeleted: { $ne: true },
+  isActive: true
+}).lean();
 
     if(!customers || customers.length===0){
       return res.status(404).json({error:"No profiles found for this email"});
@@ -1277,7 +1300,11 @@ app.post("/api/login/verify-otp", async (req,res)=>{
       return res.status(400).json({error:"Missing data"});
     }
 
-    const customer=await Customer.findOne({email});
+    const customer = await Customer.findOne({
+  email,
+  isDeleted: { $ne: true },
+  isActive: true
+});
 
     if(!customer){
       return res.status(404).json({error:"User not found"});

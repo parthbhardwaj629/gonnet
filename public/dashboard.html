@@ -28,6 +28,12 @@
       Logout
     </button>
 
+    <button
+  onclick="deleteAccount()"
+  class="btn btn-sm btn-outline-danger ms-2">
+  Delete Account
+</button>
+
   </div>
 
 </nav>
@@ -128,7 +134,7 @@ Edit
 
 <button onclick="deleteVehicle('${v.uniqueId}')"
 class="btn btn-sm btn-outline-danger w-100">
-Delete
+Disable
 </button>
 
 </div>
@@ -196,6 +202,63 @@ function logout(){
 
 }
 
+async function deleteAccount(){
+
+  const confirmed = confirm(
+    "Are you sure you want to permanently delete your Gonnet account?\n\nAll linked profiles will be disabled immediately."
+  );
+
+  if(!confirmed) return;
+
+  try{
+
+    const email =
+      localStorage.getItem("gonnetUserEmail");
+
+    const res = await fetch(
+      "/api/delete-account",
+      {
+        method:"DELETE",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+          email
+        })
+      }
+    );
+
+    const data = await res.json();
+
+    if(!res.ok){
+
+      alert(data.error || "Deletion failed");
+
+      return;
+
+    }
+
+    alert(
+      "Your account deletion request has been initiated."
+    );
+
+    localStorage.removeItem(
+      "gonnetUserEmail"
+    );
+
+    window.location.href = "/";
+
+  }catch(err){
+
+    console.log(err);
+
+    alert("Deletion failed");
+
+  }
+
+}
 
 loadDashboard();
 

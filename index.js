@@ -157,7 +157,16 @@ permanentDeletionAt: Date,
   visibility: Object,
   isRegistered: { type: Boolean, default: false },
   otp: String,
-  otpExpiry: Date,
+otpExpiry: Date,
+
+otpAttempts: {
+  type:Number,
+  default:0
+},
+
+otpBlockedUntil: Date,
+
+otpLastSentAt: Date,
   stickerConfig: {
   heading: String,
   subheading: String,
@@ -1150,9 +1159,29 @@ app.post("/api/send-otp/:uniqueId", async (req, res) => {
     const customer = await Customer.findOne({ uniqueId: req.params.uniqueId });
     if (!customer) return res.status(404).json({ error: "Customer not found" });
 
+    // OTP cooldown protection
+if (
+  customer.otpLastSentAt &&
+  Date.now() - new Date(customer.otpLastSentAt).getTime()
+    < 60 * 1000
+){
+
+  return res.status(429).json({
+    error:"Please wait before requesting another OTP"
+  });
+
+}
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     customer.otp = otp;
-    customer.otpExpiry = Date.now() + 5 * 60 * 1000;
+
+customer.otpExpiry =
+  Date.now() + 5 * 60 * 1000;
+
+customer.otpLastSentAt =
+  new Date();
+
+customer.otpAttempts = 0;
     await customer.save();
 
     // ✅ RESPONSE FIRST (FAST)
@@ -1203,11 +1232,58 @@ app.post("/api/verify-otp/:uniqueId", async (req, res) => {
     const { uniqueId } = req.params;
     const { otp } = req.body;
     const customer = await Customer.findOne({ uniqueId });
-    if (!customer || customer.otp !== otp || Date.now() > customer.otpExpiry) {
-      return res.status(400).json({ error: "Invalid/expired OTP" });
+
+      // blocked check
+if(
+  customer?.otpBlockedUntil &&
+  Date.now() <
+    new Date(customer.otpBlockedUntil).getTime()
+){
+
+  return res.status(429).json({
+    error:
+      "Too many wrong attempts. Try again later."
+  });
+
+}
+
+    if(
+  !customer ||
+  customer.otp !== otp ||
+  Date.now() > customer.otpExpiry
+){
+
+  if(customer){
+
+    customer.otpAttempts =
+      (customer.otpAttempts || 0) + 1;
+
+    // block after 5 attempts
+    if(customer.otpAttempts >= 5){
+
+      customer.otpBlockedUntil =
+        new Date(
+          Date.now() + 15 * 60 * 1000
+        );
+
     }
+
+    await customer.save();
+
+  }
+
+  return res.status(400).json({
+    error:"Invalid or expired OTP"
+  });
+
+}
     customer.otp = null;
-    customer.otpExpiry = null;
+
+customer.otpExpiry = null;
+
+customer.otpAttempts = 0;
+
+customer.otpBlockedUntil = null;
     await customer.save();
     res.json({
       success: true,
@@ -1244,6 +1320,22 @@ app.post("/api/login/send-otp", async (req,res)=>{
       return res.status(404).json({error:"No profiles found for this email"});
     }
 
+    // OTP cooldown protection
+const firstCustomer = customers[0];
+
+if(
+  firstCustomer.otpLastSentAt &&
+  Date.now() -
+    new Date(firstCustomer.otpLastSentAt).getTime()
+    < 60 * 1000
+){
+
+  return res.status(429).json({
+    error:"Please wait before requesting another OTP"
+  });
+
+}
+
     const otp=Math.floor(100000 + Math.random()*900000).toString();
 
     // store OTP
@@ -1251,9 +1343,18 @@ app.post("/api/login/send-otp", async (req,res)=>{
       {email},
       {
         $set:{
-          otp:otp,
-          otpExpiry:Date.now()+5*60*1000
-        }
+
+  otp:otp,
+
+  otpExpiry:
+    Date.now()+5*60*1000,
+
+  otpLastSentAt:
+    new Date(),
+
+  otpAttempts:0
+
+}
       }
     );
 
@@ -1306,22 +1407,65 @@ app.post("/api/login/verify-otp", async (req,res)=>{
   isActive: true
 });
 
+// blocked check
+if(
+  customer?.otpBlockedUntil &&
+  Date.now() <
+    new Date(customer.otpBlockedUntil).getTime()
+){
+
+  return res.status(429).json({
+    error:
+      "Too many wrong attempts. Try again later."
+  });
+
+}
+
     if(!customer){
       return res.status(404).json({error:"User not found"});
     }
 
-    if(customer.otp!==otp || Date.now()>customer.otpExpiry){
-      return res.status(400).json({error:"Invalid or expired OTP"});
-    }
+    if(
+  customer.otp !== otp ||
+  Date.now() > customer.otpExpiry
+){
+
+  customer.otpAttempts =
+    (customer.otpAttempts || 0) + 1;
+
+  // block after 5 attempts
+  if(customer.otpAttempts >= 5){
+
+    customer.otpBlockedUntil =
+      new Date(
+        Date.now() + 15 * 60 * 1000
+      );
+
+  }
+
+  await customer.save();
+
+  return res.status(400).json({
+    error:"Invalid or expired OTP"
+  });
+
+}
 
     // clear otp
     await Customer.updateMany(
       {email},
       {
-        $set:{
-          otp:null,
-          otpExpiry:null
-        }
+       $set:{
+
+  otp:null,
+
+  otpExpiry:null,
+
+  otpAttempts:0,
+
+  otpBlockedUntil:null
+
+}
       }
     );
 

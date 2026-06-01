@@ -100,9 +100,31 @@
   <h5 id="totalDisplay">Total: ₹299</h5>
 </div>
 
-        <button type="button" onclick="placeOrder()" class="btn btn-warning w-100">
-          Proceed to Payment
-        </button>
+<div class="form-check mt-3 mb-3">
+
+  <input
+    class="form-check-input"
+    type="checkbox"
+    id="privacyConsent"
+    required
+  >
+
+  <label
+    class="form-check-label"
+    for="privacyConsent"
+  >
+    I acknowledge that I have read and agree to Gonnet's
+    <a href="/privacy" target="_blank">
+      Privacy Policy
+    </a>
+    and Terms of Usage.
+  </label>
+
+</div>
+
+<button type="button" onclick="placeOrder()" class="btn btn-warning w-100">
+  Proceed to Payment
+</button>
 
       </form>
 
@@ -118,8 +140,6 @@
       For ordering stickers in bulk or customized stickers,<br>
       kindly contact <b>hello.gonnet@gmail.com</b>
     </p>
-
-    
 
   </footer>
 
@@ -171,6 +191,17 @@ function validateForm(){
 async function placeOrder(){
 
   if(!validateForm()) return;
+
+if(!document.getElementById("privacyConsent").checked){
+
+  alert(
+    "Please accept the Privacy Policy and Terms before proceeding."
+  );
+
+  return;
+
+}
+
   const name = document.getElementById("name").value;
   const email = document.getElementById("email").value;
   const mobile = document.getElementById("mobile").value;

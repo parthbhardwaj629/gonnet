@@ -896,20 +896,27 @@ app.get("/profile/:uniqueId/view", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "display.html"));
 });
 
-app.get("/profile/:uniqueId/qr", (req, res) => {
+// This block is for blocking the qrUrl in the mail to admin.
+// app.get("/profile/:uniqueId/qr", (req, res) => {
 
-  const ua = req.headers['user-agent'] || "";
+  //const ua = req.headers['user-agent'] || "";
 
   // ✅ Allow puppeteer (HeadlessChrome)
-  const isInternal =
-  ua.includes("Headless") ||
-  req.headers["x-internal-request"] === "true";
+  //const isInternal =
+  //ua.includes("Headless") ||
+  //req.headers["x-internal-request"] === "true";
 
-  if (!isInternal) {
-    return res.status(403).send("Access Denied");
-  }
+ // if (!isInternal) {
+   // return res.status(403).send("Access Denied");
+ // }
 
-  res.sendFile(path.join(__dirname, "public", "qr-card.html"));
+  // res.sendFile(path.join(__dirname, "public", "qr-card.html"));
+//});
+
+app.get("/profile/:uniqueId/qr", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "qr-card.html")
+  );
 });
 
 app.get("/api/qr/:uniqueId", async (req, res) => {

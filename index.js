@@ -1015,14 +1015,42 @@ if (
 
     // बाकी tera existing code yahan se continue hoga
 
+function safeUrl(url) {
+  if (!url) return "";
+
+  url = url.trim();
+
+  if (
+    url.toLowerCase() === "na" ||
+    url.toLowerCase() === "n/a"
+  ) {
+    return "";
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    if (
+      parsed.protocol !== "http:" &&
+      parsed.protocol !== "https:"
+    ) {
+      return "";
+    }
+
+    return parsed.href;
+  } catch {
+    return "";
+  }
+}
+
     body.socialLinks = {
-      instagram: body.instagram || "",
-      linkedin: body.linkedin || "",
-      github: body.github || "",
-      twitter: body.twitter || "",
-      facebook: body.facebook || "",
-      website: body.website || "",
-    };
+  instagram: safeUrl(body.instagram),
+  linkedin: safeUrl(body.linkedin),
+  github: safeUrl(body.github),
+  twitter: safeUrl(body.twitter),
+  facebook: safeUrl(body.facebook),
+  website: safeUrl(body.website),
+};
 
     // Visibility handling ✅
     body.visibility = {
@@ -1344,7 +1372,7 @@ if(
 }
 
     const otp=Math.floor(100000 + Math.random()*900000).toString();
-
+  console.log("LOGIN OTP =", otp);
     // store OTP
     await Customer.updateMany(
       {email},

@@ -67,7 +67,13 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Name</label>
-              <input name="name" class="form-control" required>
+              <input
+    name="name"
+    class="form-control"
+    required
+    maxlength="100"
+    autocomplete="name"
+    oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'').replace(/\s+/g,' ').trimStart();">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="visible_name" checked>
                 <label class="form-check-label">Visible to others</label>
@@ -95,13 +101,16 @@
           <div class="row">
             <div class="col-md-6 mb-3">
               <label class="form-label">Car Number</label>
-              <input 
-                    name="carNumber"
-                    class="form-control"
-                    required
-                    style="text-transform:uppercase"
-                    oninput="this.value = this.value.toUpperCase()"
-                    placeholder="e.g. DL01AB1234">
+              <input
+    type="text"
+    name="carNumber"
+    class="form-control"
+    required
+    maxlength="15"
+    autocomplete="off"
+    placeholder="e.g. DL01AB1234"
+    style="text-transform:uppercase"
+    oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="visible_carNumber" checked>
                 <label class="form-check-label">Visible to others</label>
@@ -123,7 +132,13 @@
       <div class="card shadow mt-3">
         <div class="card-header hero text-white"> About You</div>
         <div class="card-body">
-          <textarea name="bio" class="form-control" rows="3" placeholder="A short intro, profession, experience..."></textarea>
+          <textarea
+    name="bio"
+    class="form-control"
+    maxlength="300"
+    placeholder="Maximum 300 characters"
+    oninput="this.value=this.value.replace(/[<>`{}[\]\\]/g,'');">
+</textarea>
         </div>
       </div>
 
@@ -132,7 +147,14 @@
         <div class="card-header hero text-white"> Emergency Contact</div>
         <div class="card-body">
           <div class="row">
-            <div class="col-md-4 mb-3"><label class="form-label">Contact Name</label><input name="emergencyName" class="form-control" required>
+            <div class="col-md-4 mb-3"><label class="form-label">Contact Name</label>
+              <input
+    name="emergencyName"
+    class="form-control"
+    required
+    maxlength="100"
+    autocomplete="name"
+    oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'').replace(/\s+/g,' ').trimStart();">
               <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyName" checked><label class="form-check-label">Visible to others</label></div>
             </div>
             <div class="col-md-4 mb-3"><label class="form-label">Relation</label><input name="emergencyRelation" class="form-control" required>

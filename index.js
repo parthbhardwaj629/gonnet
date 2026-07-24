@@ -89,6 +89,23 @@ function normalizeMobile(mobile) {
 
 }
 
+function normalizeCarNumber(carNumber) {
+
+  if (!carNumber) return null;
+
+  const value = String(carNumber)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
+  // Basic Indian vehicle number validation
+  if (!/^[A-Z]{2}[0-9]{1,2}[A-Z]{1,3}[0-9]{1,4}$/.test(value)) {
+    return null;
+  }
+
+  return value;
+
+}
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -963,9 +980,13 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
     const body = req.body || {};
 
     // 🚗 NORMALIZE
-    if (body.carNumber) {
-      body.carNumber = body.carNumber.toUpperCase().replace(/\s+/g, "");
-    }
+   body.carNumber = normalizeCarNumber(body.carNumber);
+
+if (!body.carNumber) {
+  return res.status(400).json({
+    error: "Enter a valid vehicle registration number."
+  });
+}
 
     body.mobile = normalizeMobile(body.mobile);
     body.emergencyNumber = normalizeMobile(body.emergencyNumber);
@@ -1018,6 +1039,29 @@ if (
 
     // बाकी tera existing code yahan se continue hoga
 
+function sanitizeText(text, maxLength = 300) {
+
+  if (!text) return "";
+
+  return String(text)
+    .replace(/[<>`{}[\]\\]/g, "")
+    .trim()
+    .slice(0, maxLength);
+
+}
+
+function sanitizeName(name) {
+
+  if (!name) return "";
+
+  return String(name)
+    .replace(/[^A-Za-z\s]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
+
+}
+
 function safeUrl(url) {
   if (!url) return "";
 
@@ -1045,6 +1089,24 @@ function safeUrl(url) {
     return "";
   }
 }
+
+body.name = sanitizeName(body.name);
+body.emergencyName = sanitizeName(body.emergencyName);
+body.emergencyRelation = sanitizeText(body.emergencyRelation, 50);
+body.bio = sanitizeText(body.bio, 300);
+
+if (!body.name) {
+  return res.status(400).json({
+    error: "Enter a valid name."
+  });
+}
+
+if (!body.emergencyName) {
+  return res.status(400).json({
+    error: "Enter a valid emergency contact name."
+  });
+}
+
 
     body.socialLinks = {
   instagram: safeUrl(body.instagram),

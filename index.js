@@ -27,7 +27,7 @@ const razorpay = new Razorpay({
 
 
 // --- env (for Twilio keys) ---
-require("dotenv").config();
+//require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -74,30 +74,20 @@ function waTo(mob) {
   return "whatsapp:+91" + digits;
 }
 
-// Normalize mobile number for database
 function normalizeMobile(mobile) {
+
   if (!mobile) return null;
 
-  let digits = mobile.replace(/\D/g, "");
+  const digits = String(mobile).replace(/\D/g, "");
 
-  // remove leading zero
-  if (digits.startsWith("0")) {
-    digits = digits.substring(1);
+  // Only valid Indian mobile numbers
+  if (!/^[6-9]\d{9}$/.test(digits)) {
+    return null;
   }
 
-  // if 10 digit Indian number
-  if (digits.length === 10) {
-    return "+91" + digits;
-  }
+  return "+91" + digits;
 
-  // if already has country code
-  if (digits.length > 10) {
-    return "+" + digits;
-  }
-
-  return digits;
 }
-// -------------------------------------------------------
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -979,6 +969,19 @@ app.post("/api/register/:uniqueId", upload.single("photo"), async (req, res) => 
 
     body.mobile = normalizeMobile(body.mobile);
     body.emergencyNumber = normalizeMobile(body.emergencyNumber);
+    
+    
+    if (!body.mobile) {
+  return res.status(400).json({
+    error: "Enter a valid 10-digit mobile number."
+  });
+}
+
+if (!body.emergencyNumber) {
+  return res.status(400).json({
+    error: "Enter a valid 10-digit emergency contact number."
+  });
+}
 
     // ✅ FETCH ONCE
     const currentProfile = await Customer.findOne({ uniqueId });

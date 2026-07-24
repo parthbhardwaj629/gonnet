@@ -75,7 +75,16 @@
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Mobile Number</label>
-              <input name="mobile" class="form-control" required>
+              <input
+    type="tel"
+    name="mobile"
+    class="form-control"
+    required
+    maxlength="10"
+    inputmode="numeric"
+    pattern="[6-9][0-9]{9}"
+    autocomplete="tel"
+    oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);">
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" name="visible_mobile" checked>
                 <label class="form-check-label">Visible to others</label>
@@ -129,7 +138,17 @@
             <div class="col-md-4 mb-3"><label class="form-label">Relation</label><input name="emergencyRelation" class="form-control" required>
               <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyRelation" checked><label class="form-check-label">Visible to others</label></div>
             </div>
-            <div class="col-md-4 mb-3"><label class="form-label">Contact Number</label><input name="emergencyNumber" class="form-control" required>
+            <div class="col-md-4 mb-3"><label class="form-label">Contact Number</label>
+              <input
+    type="tel"
+    name="emergencyNumber"
+    class="form-control"
+    required
+    maxlength="10"
+    inputmode="numeric"
+    pattern="[6-9][0-9]{9}"
+    autocomplete="tel"
+    oninput="this.value=this.value.replace(/\D/g,'').slice(0,10);">
               <div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="visible_emergencyNumber" checked><label class="form-check-label">Visible to others</label></div>
             </div>
           </div>
